@@ -27,8 +27,8 @@ var bookmark = (function(){
         console.log(bookmark);
     });
 
-    chrome.tabs.onCreated().addListener(function(tab){
+    chrome.tabs.onCreated.addListener(function(tab){
         console.log(tab);
     });
 
-})()
+})();
