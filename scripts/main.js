@@ -19,8 +19,14 @@ var buildHistory = function(){
 };
 
 var getUrls = function(){
-    chrome.history.getVisits({url:"http://www.facebook.com"}, function(visItems){
-        console.log(visItems);
+    /*Find way to get search across many days*/
+    chrome.history.search({
+            text : "alistair.ballantine", 
+            maxResults : 2000, 
+            startTime : 0,
+            endTime:(new Date()).getTime()
+        }, function(hisItems){
+        console.log(hisItems);
     });
 };
 
