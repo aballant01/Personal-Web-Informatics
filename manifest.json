@@ -1,0 +1,38 @@
+{
+  "name": "Personal Web Informatics",
+  "version": "0.1",
+  "description": "A tool that looks at your web history and tells you about it",
+
+  "permissions": [
+    "tabs",
+    "bookmarks",
+    "history",
+    "management", 
+    "unlimitedStorage",
+    "notifications"
+  ],
+  "app": {
+    "launch":{
+        "local_path":"index.html"
+    }
+  },
+  "icons": {
+    "16": "assets/icon_16.png",
+    "128": "assets/icon_128.png"
+  }, 
+  "background-page":"background.html"
+}
+/*
+"browser_action": {
+    "default_icon": "icon.png"
+  },
+
+  js": ["scripts/jquery-1.7.1.min.js","raphael-min.js", "g.raphael-min.js", "main.js"]
+
+  "content_scripts": [
+    {
+      "matches": ["http://jquery.com/*"],
+      "js": ["scripts/jquery-1.7.1.min.js", "main.js"]
+    }
+  ],
+ */
