@@ -1,0 +1,66 @@
+/*====================*/
+/*=== Reset Styles ===*/
+/*====================*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin:0;
+	padding:0;
+	border:0;
+	outline:0;
+	font-weight:inherit;
+	font-style:inherit;
+	font-size:100%;
+	font-family:inherit;
+	vertical-align:baseline;
+}
+
+body, html {
+	width:100%;
+	height:100%;
+	background-color:#FDFDFD;
+}
+
+/**********************/
+/***Container Styles***/
+/**********************/
+
+#container h3 {
+	font-family: "Lucida Grande", arial, sans-serif;
+	font-size: 110%;
+}
+
+#container {
+	width: 70%;
+	margin: 1em auto 1em auto;
+}
+
+#container .info_item {
+	border:1px solid #E0E0E0;
+	box-shadow			:0px 0px 4px #858585;
+	-moz-box-shadow		:0px 0px 4px #858585;
+	-webkit-box-shadow	:0px 0px 4px #858585;
+	min-height:4em;
+	height:15%;
+	margin-top:1em;
+	max-height:15%;
+	font-family:"Lucida Grande", arial, sans-serif;
+}
+
+.info_item img {
+	
+	max-height:100%;
+	max-width:20%;
+}
+
+.info_item p {
+	padding-left:2%;
+	line-height:2em;
+}
+
+.float_left { float:left; }

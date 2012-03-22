@@ -3,6 +3,8 @@ var app = (function(){
         data = JSON.parse(localStorage['web_informatics_data']);
     }else{
         data = {};
+        data['history'] = {};
+        data['bookmarks'] = {}
     }
 
     base_urls = [
@@ -13,9 +15,14 @@ var app = (function(){
         "plus.google.com"
     ];
 
+    var storeData = function(){
+        localStorage['web_informatics_data'] = JSON.stringify(data);
+    };
+
     return {
-        data : data,
-        urls : base_urls
+        data      : data,
+        storeData : storeData,  
+        urls      : base_urls
     }
 
 })();
@@ -27,8 +34,23 @@ var bookmark = (function(){
         console.log(bookmark);
     });
 
+
+})();
+
+var tab = (function(){
     chrome.tabs.onCreated.addListener(function(tab){
         console.log(tab);
+    });
+
+    chrome.tabs.onCreated.addListener(function(tab){
+        console.log(tab)
+    });
+
+    chrome.tabs.onRemoved.addListener(function(tab, removeInfo){
+        // For this, we will need to retrieve the tab data from the id
+        // passed in the "tab" parameter
+        console.log(tab);
+        console.log(removeInfo);
     });
 
 })();
