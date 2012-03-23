@@ -32,6 +32,16 @@ var app = (function(){
         localStorage['web_informatics_data'] = JSON.stringify(data);
     };
 
+    var addIndexCount = function( base_url, index ) {
+        if(data.indices[base_url]){
+            data.indicies[base_url].push(index);
+        }else{
+            data.indices[base_url] = [];
+            data.indices[base_url].push(index);
+        }
+    };
+
+
     return {
         data      : data,
         storeData : storeData,  
@@ -52,7 +62,17 @@ var bookmark = (function(){
 
 var tab = (function(){
     chrome.tabs.onCreated.addListener(function(tab){
-        console.log(tab);
+        if(tab.url !== "chrome://newtab" && !tab.incognito){
+            var histitem = new history.HistItem( tab );
+            var index = app.data.history.push(histitem);
+            app.addIndexCount(histitem.base_url, index);
+
+            console.log("start oncreated tab");
+            console.log(tab);
+            console.log(histitem);
+            console.log(app.data.indices);
+            console.log("end oncreated tab");
+        };
     });
 
     chrome.tabs.onCreated.addListener(function(tab){
@@ -79,23 +99,46 @@ var tab = (function(){
 */
 var history = (function(){
     var HistItem = function( obj ) {
+        this.index = app.data.history.length + 1;
         this.ID = obj.id;
         this.url = obj.url;
         this.baseURL = app.getBaseURL(obj.url);
-        this.startTime = new Date();
-        this.duration = 0; // Initially set to 0 - when closed or 
+        this.startTime = (new Date()).getTime();
+        // Initially set to 0 - when closed or updated add to the duration
+        this.duration = 0;
         this.chromeObj = obj;
     };
 
-    HistItem.prototype.setLength = function( endTime ){
+    HistItem.prototype.setDuration = function( endTime ){
         this.duration = endTime - this.startTime; 
     };
 
+    /**
+    * Gets the duration
+    */
     HistItem.prototype.getDuration = function(){
-        return this.duration;
+        var dur = this.duration;
+        return (dur !== 0) ? dur : (new Date()).getTime() - this.startTime;
     };
 
+    /**
+    * Retrieves the total length of time spent on a specific 
+    * site/base URL. 
+    * @param {base_url} The website base URL to retrieve the
+    *   duration of visit from.
+    * @return: The site visit duration in milliseconds 
+    */
+    var getUrlDur = function( base_url ){
+        var indices = app.data.indices[base_url];
+        var totalDur = 0;
+        for(var i = 0, len = indices.length; i < len; i++){
+            totalDur += app.data.history[indices[i]].getDuration();
+        };
+
+        return totalDur;
+    };
     return {
-        HistItem : HistItem
+        HistItem : HistItem, 
+        getUrlDur: getUrlDur
     };
 })();
