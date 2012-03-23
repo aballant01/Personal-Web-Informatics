@@ -3,8 +3,9 @@ var app = (function(){
         data = JSON.parse(localStorage['web_informatics_data']);
     }else{
         data = {};
-        data['history'] = {};
-        data['bookmarks'] = {}
+        data['history'] = [];
+        data['bookmarks'] = [];
+        data['indices'] = {};
     }
 
     base_urls = [
@@ -14,6 +15,18 @@ var app = (function(){
         "reddit.com",
         "plus.google.com"
     ];
+
+    var re = var re = /^http[s]?:\/\/([a-zA-Z\.-]+)/;
+
+    var getBaseURL = function( url ){
+        var path = url.split("/");
+        if(path.length > 1){
+            return path[2];
+        }else{
+            return re.exec(url)[0];
+        };
+        
+    };
 
     var storeData = function(){
         localStorage['web_informatics_data'] = JSON.stringify(data);
@@ -55,91 +68,34 @@ var tab = (function(){
 
 })();
 
-
-// Database
-var db = (function(){
-    var initDatabase = function() {
-        try {
-            if (!window.openDatabase) {
-                alert('Local databases are not supported by your browser. ');
-            } else {
-                var shortName = 'web_informatics_data';
-                var version = '1.0';
-                var displayName = 'Web Informatics Data';
-                var maxSize = 1000000; // in bytes
-                DB = openDatabase(shortName, version, displayName, maxSize);
-                createTables();
-            }
-        } catch(e) {
-            if (e == 2) {
-                // Version mismatch.
-                console.log("Invalid database version.");
-            } else {
-                console.log("Unknown error "+ e +".");
-            }
-            return;
-        } 
+/**
+* Module for storing history related objects and methods 
+* related to history functions - right now my idea is to store
+* all of the history items as an object of our own creation that
+* we can then write functions to get data from, and worst comes
+* to worst we also store the chrome object for now, such that
+* if we find we need data from it, we can A) get it initially and
+* B) write methods to retrieve that data. 
+*/
+var history = (function(){
+    var HistItem = function( obj ) {
+        this.ID = obj.id;
+        this.url = obj.url;
+        this.baseURL = app.getBaseURL(obj.url);
+        this.startTime = new Date();
+        this.duration = 0; // Initially set to 0 - when closed or 
+        this.chromeObj = obj;
     };
 
-    var createTables = function (){
-        DB.transaction(
-            function (transaction) {
-                transaction.executeSql(
-                    ('CREATE TABLE IF NOT EXISTS history(date TEXT NOT NULL PRIMARY KEY, url TEXT NOT NULL);'),
-                     [], nullDataHandler, errorHandler
-                );
-            }
-        );
+    HistItem.prototype.setLength = function( endTime ){
+        this.duration = endTime - this.startTime; 
     };
 
-    var nullDataHandler = function (){
-        console.log("SQL Query Succeeded");
+    HistItem.prototype.getDuration = function(){
+        return this.duration;
     };
 
-    var errorHandler = function (transaction, error){
-        if (error.code==1){
-            // DB Table already exists
-        } else {
-            // Error is a human-readable string.
-            console.log('Oops.  Error was '+error.message+' (Code '+error.code+')');
-        }
-        return false;
+    return {
+        HistItem : HistItem
     };
-
-    var selectAll = function (){ 
-        DB.transaction(
-            function (transaction) {
-                transaction.executeSql("SELECT * FROM history;", 
-                    [], dataSelectHandler, errorHandler);
-            }
-        );  
-    };
-
-    var dataSelectHandler = function (transaction, results){
-        for (var i = 0, len = results.rows.length; i < len ; i++) {
-            var row = results.rows.item(i);
-            var item = new Object();
-            item.date   = row['date'];
-            item.url = row['url'];
-            console.log(item);
-        }
-    };
-
-    var insert = function (date, url){
-        DB.transaction(
-            function (transaction) {
-            transaction.executeSql("INSERT INTO history(date, url) VALUES (?, ?)", [date, url]);
-            }
-        );  
-    };
-
-    return{
-        initDatabase : initDatabase,
-        insert       : insert,
-        selectAll    : selectAll
-    }
 })();
-
-db.initDatabase();
-db.insert(new Date(), 'http://www.example.com');
-db.selectAll();
