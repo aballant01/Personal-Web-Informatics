@@ -1,3 +1,4 @@
+
 var app = (function(){
     if(localStorage['web_informatics_data']){
         data = JSON.parse(localStorage['web_informatics_data']);
@@ -16,16 +17,17 @@ var app = (function(){
         "plus.google.com"
     ];
 
-    var re = var re = /^http[s]?:\/\/([a-zA-Z\.-]+)/;
+    var re = /^http[s]?:\/\/([a-zA-Z\.-]+)/;
 
     var getBaseURL = function( url ){
         var path = url.split("/");
         if(path.length > 1){
             return path[2];
         }else{
-            return re.exec(url)[0];
-        };
-        
+            console.log(url);
+            console.log(re.exec(url));
+            return path[0];
+        };   
     };
 
     var storeData = function(){
@@ -34,18 +36,38 @@ var app = (function(){
 
     var addIndexCount = function( base_url, index ) {
         if(data.indices[base_url]){
-            data.indicies[base_url].push(index);
+            data.indices[base_url].push(index);
         }else{
             data.indices[base_url] = [];
             data.indices[base_url].push(index);
         }
     };
 
+    /**
+    * Sets an interval timer that will store the user data
+    * in local storage every 60 seconds
+    */
+    var storeInterval = function(){
+        window.setTimeout(function(){
+            console.log("Interval");
+            storeData();
+            storeInterval();
+        }, 60000);
+    };
+
+    var clearData = function(){
+        data = {};
+        storeData();
+    };
+
+    storeInterval();
 
     return {
         data      : data,
         storeData : storeData,  
-        urls      : base_urls
+        urls      : base_urls,
+        getBaseURL: getBaseURL,
+        addIndexCount: addIndexCount
     }
 
 })();
@@ -61,22 +83,21 @@ var bookmark = (function(){
 })();
 
 var tab = (function(){
-    chrome.tabs.onCreated.addListener(function(tab){
-        if(tab.url !== "chrome://newtab" && !tab.incognito){
+
+    chrome.tabs.onCreated.addListener(function( tab ){
+        if(tab.url !== "chrome://newtab/" && !tab.incognito){
+            
             var histitem = new history.HistItem( tab );
             var index = app.data.history.push(histitem);
-            app.addIndexCount(histitem.base_url, index);
+            app.addIndexCount(histitem.baseURL, index);
 
-            console.log("start oncreated tab");
-            console.log(tab);
-            console.log(histitem);
-            console.log(app.data.indices);
-            console.log("end oncreated tab");
         };
     });
 
-    chrome.tabs.onCreated.addListener(function(tab){
-        console.log(tab)
+    chrome.tabs.onUpdated.addListener(function( tabId, changeInfo, tab ){
+        console.log(tab);
+        console.log(changeInfo);
+        console.log(tab);
     });
 
     chrome.tabs.onRemoved.addListener(function(tab, removeInfo){
