@@ -9,6 +9,7 @@ var app = (function(){
             data['history'] = [];
             data['bookmarks'] = [];
             data['indices'] = {};
+            data['byDate'] = {};
             data['start_time'] = Date.now();
         }
     }   
@@ -102,7 +103,24 @@ var app = (function(){
         var histitem = new history.HistItem( obj );
         var index = app.data.history.push(histitem);
         app.addIndexCount(histitem.baseURL, index);
+
+        var d = getDateString();
+
+        if(!data.byDate[d]){
+            data.byDate[d] = [];
+        }    
+        data.byDate[d].push(histitem);
     };
+
+
+    var getDateString = function(){
+        var d = new Date();
+        return [
+            d.getUTCFullYear(),  
+            pad(d.getUTCMonth()+1),
+            pad(d.getUTCDate())
+        ].join('-');
+    }
 
     init();
     storeInterval();
@@ -165,14 +183,10 @@ var tab = (function(){
 
                     lastTab.setDuration(Date.now());
 
-                    var histitem = new history.HistItem( tab );
-                    var index = app.data.history.push(histitem);
-                    app.addIndexCount(histitem.baseURL, index);
+                    app.addToHistory(tab);
                 }else{
 
-                    var histitem = new history.HistItem( tab );
-                    var index = app.data.history.push(histitem);
-                    app.addIndexCount(histitem.baseURL, index);
+                    app.addToHistory(tab);
                 }
             }
         }

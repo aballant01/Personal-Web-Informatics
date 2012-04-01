@@ -1,6 +1,6 @@
 {
   "name": "Personal Web Informatics",
-  "version": "0.1",
+  "version": "0.5",
   "description": "A tool that looks at your web history and tells you about it",
 
   "permissions": [

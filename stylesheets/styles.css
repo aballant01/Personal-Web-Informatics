@@ -1,3 +1,7 @@
+@font-face {
+  font-family: "District Thin";
+  src: url(DistThin.otf) format("truetype");
+}
 /*====================*/
 /*=== Reset Styles ===*/
 /*====================*/
@@ -23,7 +27,7 @@ table, caption, tbody, tfoot, thead, tr, th, td {
 body, html {
 	width:100%;
 	height:100%;
-	background-color:#FDFDFD;
+	background-color:#1E2129;
 }
 
 /**********************/
@@ -31,25 +35,31 @@ body, html {
 /**********************/
 
 #container h3 {
-	font-family: "Lucida Grande", arial, sans-serif;
-	font-size: 110%;
+	font-family: "District Thin", "Lucida Grande", tahoma, arial, sans-serif;
+	font-size: 250%;
+	color:#f3f3f3;
+	letter-spacing:.16em;
 }
 
 #container {
 	width: 70%;
 	margin: 1em auto 1em auto;
+	font-family: "Lucida Grande", "Lucida Sans", tahoma, arial, sans-serif;
 }
 
 #container .info_item {
-	border:1px solid #E0E0E0;
-	box-shadow			:0px 0px 4px #858585;
-	-moz-box-shadow		:0px 0px 4px #858585;
-	-webkit-box-shadow	:0px 0px 4px #858585;
-	min-height:4em;
-	height:15%;
+	/*border:1px solid #E0E0E0;
+	box-shadow			: 0px 0px 4px #858585;
+	-moz-box-shadow		: 0px 0px 4px #858585;
+	-webkit-box-shadow	: 0px 0px 4px #858585;*/
+	padding:.5em	;
+	min-height:10%;
+	height:10%;
 	margin-top:1em;
-	max-height:15%;
-	font-family:"Lucida Grande", arial, sans-serif;
+	max-height:10%;
+	border-radius:10px;
+	float:left;
+	margin-right:1%;
 }
 
 .info_item img {
@@ -60,7 +70,75 @@ body, html {
 
 .info_item p {
 	padding-left:2%;
-	line-height:2em;
+	/*line-height:2em;*/
 }
 
 .float_left { float:left; }
+
+.wide { width : 55%; }
+.thin { width : 38%; }
+.full { width : 95%; }
+
+.theme1{
+	background-color:#4c67a7;
+	color:#f2f2f2;
+}
+
+.theme2{
+	background-color:#ac1216;
+	color:#f2f2f2;
+}
+
+.theme3{
+	background-color:#8C8984;
+	color:#363636;
+}
+
+.theme4{
+	background-color:#4fe459;
+	color:#454545;
+}
+
+.theme5{
+	background-color:#2f5ca8;
+	color:#f3f3f3;
+}
+
+.theme6{
+	background-color:#dA9A59;
+	color:#454545;
+}
+
+.theme7{
+	background-color:#1f147c;
+	color:#f2f2f2;
+}
+
+.theme8{
+	background-color:#ff5d69;
+	color:#454545;
+}
+
+.theme9{
+	background-color:#FFAB4A;
+	color:#454545;
+}
+
+.theme10{
+	background-color:#1E2129;
+	color:#f2f2f2;
+}
+/***
+Colors
+
+#4c67a7
+#ac1216
+#8C8984
+#4fe459
+#2f5ca8
+#d8fc00
+#1f147c
+#ff5d69
+#FFAB4A
+#1E2129
+*/
