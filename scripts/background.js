@@ -9,7 +9,12 @@ var app = (function(){
             data['history'] = [];
             data['bookmarks'] = [];
             data['indices'] = {};
+            data['byDate'] = {};
             data['start_time'] = Date.now();
+        }
+
+        if(!data.byDate){
+            data['byDate'] = {};
         }
     }   
 
@@ -65,7 +70,7 @@ var app = (function(){
         window.setTimeout(function(){
             storeData();
             storeInterval();
-        }, 60000);
+        }, 30000);
     };
 
     /**
@@ -76,24 +81,83 @@ var app = (function(){
         storeData();
     };
 
+    /**
+    * Finds the number of visits to a specific URL
+    * 
+    * @param {url} The target URL to count for
+    * @returns the number of visits to the given URL
+    */
+    var findNumVisits = function(url){
+        var indices = data.indices[getBaseURL(url)];
+        
+        var len = (indices) ? indices.length : data.history.length;
+        var arr = (indices) ? indices : data.history;
+        var count = 0;
+
+        for(var i = 0; i < len; i++){
+            if(arr[i].url === url){
+                count += 1;
+            }
+        }
+
+        return count;
+    };
+
+    /**
+    * Adds the selected history item to the data store
+    * and creates an index in the 
+    */
+    var addToHistory = function( obj ){
+        var histitem = new history.HistItem( obj );
+        var index = app.data.history.push(histitem);
+        app.addIndexCount(histitem.baseURL, index);
+
+        var d = getDateString();
+
+        if(!data.byDate[d]){
+            data.byDate[d] = [];
+        }    
+        data.byDate[d].push(histitem);
+    };
+
+
+    var getDateString = function(){
+        var d = new Date();
+        return [
+            d.getUTCFullYear(),  
+            (d.getUTCMonth()+1),
+            (d.getUTCDate())
+        ].join('-');
+    }
+
     init();
     storeInterval();
 
     return {
-        data      : data,
-        storeData : storeData,  
-        urls      : base_urls,
-        getBaseURL: getBaseURL,
-        addIndexCount: addIndexCount
+        data          : data,
+        storeData     : storeData,  
+        getBaseURL    : getBaseURL,
+        addIndexCount : addIndexCount,
+        findNumVisits : findNumVisits,
+        addToHistory  : addToHistory
     }
 
 })();
 
-var bookmark = (function(){
-    
+var bm = (function(){
+
+    var bmark = function(bookmark){
+        this.url = bookmark.url;
+        this.baseURL = app.getBaseURL(this.url);
+        this.numVisits = 0 + app.findNumVisits(this.url);
+        this.created = new Date();
+    };
+
     chrome.bookmarks.onCreated.addListener(function(id, bookmark){
         console.log(id);
         console.log(bookmark);
+
+        app.data.bookmarks.push(new bmark(bookmark));
     });
 
 
@@ -102,63 +166,75 @@ var bookmark = (function(){
 var tab = (function(){
 
     chrome.tabs.onCreated.addListener(function( tab ){
-        if(tab.url !== "chrome://newtab/" && !tab.incognito){
-            
-            var histitem = new history.HistItem( tab );
-            var index = app.data.history.push(histitem);
-            app.addIndexCount(histitem.baseURL, index);
-
-        };
+        if(tab.url && tab.url !== ""){
+            if(tab.url.split("/")[0] !== "chrome:" && !tab.incognito){
+                
+                var histItem = new history.HistItem( tab );
+                var index = app.data.history.push(histItem);
+                app.addIndexCount(histItem.baseURL, index);
+            }
+        }
     });
 
     chrome.tabs.onUpdated.addListener(function( tabId, changeInfo, tab ){
-        console.log("Updated")
-        console.log(tab);
 
-        if(tab.status === "complete"){
+        if(!tab.incognito){
+            if(tab.status === "complete"){
+                var lastTab = findLastTab(app.data.history, tabId);
+                if (lastTab.url === tab.url){
+                    return;
+                }else if(lastTab !== 0){
 
-            var lastTab = findLastTab(data.history, tabId);
-            if (lastTab.url === tab.url){
-                return;
-            }else{
+                    if(!lastTab.setDuration){
+                        lastTab = new history.HistItem(lastTab);
+                    }
 
-                lastTab.setDuration(Date.now());
+                    lastTab.setDuration(Date.now());
 
-                var histitem = new history.HistItem( tab );
-                var index = app.data.history.push(histitem);
-                app.addIndexCount(histitem.baseURL, index);
+                    app.addToHistory(tab);
+                }else{
+
+                    app.addToHistory(tab);
+                }
             }
         }
-
     });
 
-    chrome.tabs.onRemoved.addListener(function(tab, removeInfo){
+    chrome.tabs.onRemoved.addListener(function(tabId, removeInfo){
         // Find the most recent occurence of the Tab ID
-        var historyItem = findLastTab( data.history, tab);
 
-        historyItem.setDuration(Date.now());
+        var historyItem = findLastTab( app.data.history, tabId);
+        
+        if(historyItem !== 0){
+
+            if(!historyItem.setDuration){
+                historyItem = new history.HistItem(historyItem);
+            }
+
+            historyItem.setDuration(Date.now());
+        }
         // just doing it this way for now, will try for better way 
     });
 
     /**
+    * Finds the last instance of a tab with a given URL
     * 
+    * @param {arr} The tab array to search in
+    * @param {tabId} The Chrome tabID to search for
+    * @param {url} The URL of the item to search for (optional)
+    * 
+    * @returns the found tab object or 0 if nothing was found 
     */
     var findLastTab = function( arr, tabId, url ){
-        for(var i = arr.length; i > 0; i--){
+        for(var i = arr.length - 1; i >= 0; i -= 1){
 
-            var tab = arr[i-1];
-            
-            if(tab.ID === tabId){
-                if(url){
-                    if(app.getBaseURL(tab.url) !== app.getBaseURL(url)){
-                        continue;
-                    }
-                }
+            var tab = arr[i];
+            if(tab.id === tabId){
                 return tab;
             }
         }
         return 0;
-    }
+    };
 })();
 
 /**
@@ -173,12 +249,13 @@ var tab = (function(){
 var history = (function(){
     var HistItem = function( obj ) {
         this.index = app.data.history.length + 1 || obj.id;
-        this.ID = obj.id;
+        this.id = obj.id;
         this.url = obj.url;
-        this.baseURL = app.getBaseURL(obj.url);
-        this.startTime = Date.now();
+        this.baseURL = obj.baseURL      || app.getBaseURL(obj.url);
+        this.startTime = obj.startTime  || Date.now();
+        this.fullDate = obj.fullDate    || new Date();
         // Initially set to 0 - when closed or updated add to the duration
-        this.duration = 0;
+        this.duration = (obj.duration && obj.duration !== 0)? obj.duration : 0;
         //this.chromeObj = obj;
     };
 
@@ -213,6 +290,7 @@ var history = (function(){
 
         return totalDur;
     };
+
     return {
         HistItem : HistItem, 
         getUrlDur: getUrlDur
