@@ -3,6 +3,13 @@ var bookmarks = (function(){
     var bMarksInfo = [];
     var countInfo = {};
 
+    /**
+    * Makes a call to the Chrome Bookmarks API to get a tree 
+    * of all the bookmarks that a user has. This is an 
+    * asynchronous call, so we will need to find a better way
+    * to ensure that this data is ready when we need to generate
+    * the bookmark tree. 
+    */
     var build = function(){
         chrome.bookmarks.getTree(function(treeNodes){
             buildHelper(treeNodes);
@@ -10,6 +17,11 @@ var bookmarks = (function(){
         });
     };
 
+    /**
+    * Helper to the build fundtion that traverses the bookmarks
+    * tree recursively to build a flat file of all the users
+    * bookmarks. 
+    */
     var buildHelper = function( nodes ){
         if(nodes instanceof Array){
             var len = nodes.length;
@@ -22,6 +34,10 @@ var bookmarks = (function(){
         
     };
 
+    /**
+    * Adds the appropriate elements to the bMarksInfo array
+    * structure that holds the user list of bookmarks 
+    */
     var buildAdd = function(nodes){
         if(nodes.hasOwnProperty('children')){
             buildHelper(nodes.children);

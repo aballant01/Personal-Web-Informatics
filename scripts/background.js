@@ -120,7 +120,10 @@ var app = (function(){
         data.byDate[d].push(histitem);
     };
 
-
+    /**
+    * Returns the current time as a string in the 
+    * format of YYYY-MM-DD
+    */
     var getDateString = function(){
         var d = new Date();
         return [

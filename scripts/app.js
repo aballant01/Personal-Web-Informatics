@@ -90,6 +90,16 @@ var app = (function(){
         
     };
     
+    /**
+    * Adds a new InfoItem element to the container element.
+    * The text of the element is going to be the statmentText
+    * passed to it. 
+    *
+    * @param {statmentText} The prompt to be displayed in in
+    *   the newly created element
+    * @param {width} The class to define the width of the
+    *   added element. Can be 'thin', 'wide', or 'full' 
+    */
     var addBodyElem = function(statementText, width){
         var classWidth = width || "full"
 
