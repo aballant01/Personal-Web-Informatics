@@ -8,7 +8,8 @@
 * "{0} is dead, but {1} is alive! {0} {2}".format("ASP", "ASP.NET");
 * "ASP is dead, but ASP.NET is alive! ASP {2}"
 * 
-* Thanks to http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format/4673436#4673436
+* Thanks to fearphage on stackoverflow here:
+* http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format/
 *
 */
 String.prototype.format = function() {
@@ -21,6 +22,13 @@ String.prototype.format = function() {
   });
 };
 
+String.prototype.startsWith = function(str){
+    return this.substring(0,str.length) === str;
+};
+
+String.prototype.endsWith = function(str){
+    return this.substring(this.length - str.length) === str;
+};
 
 var app = (function(){
 
@@ -43,16 +51,27 @@ var app = (function(){
     // Will need to split these up into categories of statements, such that
     // we can pick randomly from a certain subset rather than the whole set
     var statements = {
-        "apollo11Length" : "In the time you've spent on {0}, Apollo 11 would have gone to the moon and back {1} times!",
-        "num 1994 web": "You've visited more websites in the past {0} than existed in 1994",
+        "apollo11Length"    : "In the time you've spent on {0}, Apollo 11 would have " + 
+            "gone to the moon and back {1} times!",
+        
+        "num 1994 web"      : "You've visited more websites in the past {0} than existed in 1994",
+        
         // As a developing alernative to the above:
-        "num1994WebDev": "The number of websites you've visited is {0} times the number that existed in 1994",
-        //"youtubeVideos"   : "In the time you've spent watching videos on youtube, you could have watched {0} best picture winning movies",
-        "youtubeVideos": "you have spent {0} hours watching youtube",
+        "num1994WebDev"     : "The number of websites you've visited is {0} times " + 
+            "the number that existed in 1994",
+        //"youtubeVideos"   : "In the time you've spent watching videos on youtube, you 
+        //  could have watched {0} best picture winning movies",
+        "youtubeVideos"     : "you have spent {0} hours watching youtube",
+        
         "siteVisitCountComp" : "You've visited {0} {1} times {2} compared with {3}",
         "googleSearchEnergy" : "In the energy you've used in google searches",
-        "rawBookmarks":"You have clicked on {0} of your bookmarks since the beginning of time (since you installed this)",
-        "googEnergyDev":"You have used {0} kWh of energy in Google searches alone"
+        
+        "rawBookmarks"      :"You have clicked on {0} of your bookmarks since the beginning " + 
+            "of time (since you installed this)",
+        
+        "googEnergyDev"     :"You have used {0} kWh of energy in Google searches alone", 
+        
+        "minTime"           : "Do you remember {0}? Probably not, you were only there for {1} seconds" 
     };
 
     var $container = $('#container');
@@ -67,29 +86,45 @@ var app = (function(){
     * to code up. 
     */
     var addInformatics = function(){
-        
-        var $timeElem = history.buildWebTime();
-        addBodyElem($timeElem,"wide");
 
-        var $visitCompElem = history.buildVisitComp("www.google.com");
-        addBodyElem($visitCompElem, "thin");
+        var appFunctions = buildFunctionList();
 
-        var $numWebVisits = history.fetchTotalWebVisits();
-        addBodyElem($numWebVisits);
+        for(var i = 0, l = appFunctions.length; i < l; i++){
+            var elem = appFunctions[i]();
+            addBodyElem(elem);
+        }
 
-        var $youTime = history.fetchYoutube('time');
-        addBodyElem(
-            statements.youtubeVideos.format(dataProc.round($youTime / 3600000, 2)), "thin"
-        );
-
-        var bcount = bookmarks.getCount('count');
-        addBodyElem(statements.rawBookmarks.format(bcount), "wide");
-
-        var googEnergy = history.googEnergy();
-        addBodyElem(statements['googEnergyDev'].format(googEnergy));
-        
     };
     
+    /**
+    * 
+    */
+    var buildFunctionList = function(){
+        var appFunctions =[
+            history.buildWebTime,
+            
+            function(){
+                return history.buildVisitComp("www.google.com");
+            },
+
+            history.fetchTotalWebVisits,
+            
+            function(){
+                return history.fetchYoutube('time');
+            },
+            
+            function(){
+                return bookmarks.getCount('count');
+            },
+            
+            history.googEnergy, 
+
+            history.findMinTime 
+        ];
+
+        return appFunctions;
+    };
+
     /**
     * Adds a new InfoItem element to the container element.
     * The text of the element is going to be the statmentText
@@ -100,40 +135,13 @@ var app = (function(){
     * @param {width} The class to define the width of the
     *   added element. Can be 'thin', 'wide', or 'full' 
     */
-    var addBodyElem = function(statementText, width){
-        var classWidth = width || "full"
-
+    var addBodyElem = function(statementText){
         $container.append(
             $infoItem.clone().append(
                 $infoP.clone().text(statementText)
-            ).addClass(
-                classWidth + 
-                " " + 
-                dataProc.randArrayElem(themes.split(" "))
             )
         )
-    }
-    
-    /*
-    var addElems = function(elements){
-        var len = elements.length;
-
-        if(%)
-
-        $div = $("<div></div>");
-        for(var i = 0; i < len; i++){
-            if(i % ) 
-
-            $div.append(
-                $infoItem.clone().append(
-                    $infoP.clone().text(elements[i]);
-                ).addClass(
-
-                )
-            )
-        }
-
-    }*/
+    };
 
     return {
         data           :data,

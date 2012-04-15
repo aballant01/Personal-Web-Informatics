@@ -65,10 +65,28 @@ var dataProc = (function(){
         return arr[0, getRandomInt(0,arr.length-1)];
     };
 
+    /**
+    * Takes a complete url path and returns the core domain
+    * path, AKA the base URL. For example, the URL
+    * http://www.foo.com/bar?test=true would return www.foo.com
+    *
+    * @param {url} The complete url string
+    * @returns The base URL component of the full URL
+    */
+    var getBaseURL = function( url ){
+        var path = url.split("/");
+        if(path.length > 1){
+            return path[2];
+        }else{
+            return path[0];
+        };   
+    };
+
     return{
         fetchTime : fetchTime,
         round : round,
         getRandomInt : getRandomInt,
-        randArrayElem: randArrayElem
+        randArrayElem : randArrayElem,
+        getBaseURL : getBaseURL
     }
 })();

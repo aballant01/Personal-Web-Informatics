@@ -1,3 +1,10 @@
+String.prototype.startsWith = function(str){
+    return this.substring(0,str.length) === str;
+};
+
+String.prototype.endsWith = function(str){
+    return this.substring(this.length - str.length) === str;
+};
 
 var app = (function(){
 
@@ -170,7 +177,7 @@ var tab = (function(){
 
     chrome.tabs.onCreated.addListener(function( tab ){
         if(tab.url && tab.url !== ""){
-            if(tab.url.split("/")[0] !== "chrome:" && !tab.incognito){
+            if(!tab.url.startsWith("chrome:") && !tab.incognito){
                 
                 var histItem = new history.HistItem( tab );
                 var index = app.data.history.push(histItem);

@@ -1,8 +1,12 @@
+
 var history = (function(){
 
+    /**
+    * Fetches the total number of websites visited (non-distinct)
+    * web visits 
+    */
     var fetchTotalWebVisits = function(){
         var $p = app.$infoP.clone();
-
         var len = app.data.history.length;
 
         var div = len / app.compareItems['num1994Websites'];
@@ -19,7 +23,7 @@ var history = (function(){
     };
     
     /**
-    *
+    * 
     */
     var buildVisitComp = function(url){
         var $p = app.$infoP.clone();
@@ -57,15 +61,6 @@ var history = (function(){
                 currItem.startTime >= (now - (dayLen*2))){
                 past.push(app.data.history[arr[i]]);
             }
-
-            /*
-            var date = new Date(currItem.fullDate);
-
-            if(date.getDate() == today){
-                curr.push(data.history[arr[i]]);
-            }else if(date.getDate() == ){
-                curr.push(arr[i]);
-            }*/
         }
 
         return [curr, past];
@@ -101,8 +96,9 @@ var history = (function(){
                 data.objs.push(currItem);
             }
         }
-
-        return data[dataType];
+        var state = app.statements.youtubeVideos.
+            format(dataProc.round(data[dataType]/3600000,2));
+        return state;
     };
 
     var googEnergy = function(){
@@ -120,9 +116,41 @@ var history = (function(){
                 }
             }
         }
+        var googEnergy = app.compareItems['googleSearchEnergyKWh'] * count;
+        
+        return app.statements['googEnergyDev'].format(dataProc.round(googEnergy,2));
 
-        return app.compareItems['googleSearchEnergyKWh'] * count;
+    };
 
+    var findMinTime = function(){
+
+        var len = app.data.history.length, 
+            minTime = 10000, 
+            index = -1, 
+            url = ""; // Setting the threshold for minimum time
+
+        for(var i = 0; i < len; i++){
+            var dur = app.data.history[i].duration;
+            if( dur < minTime && dur !== 0){
+                
+                var check = app.data.history[i].url;
+                var base = dataProc.getBaseURL(check);
+
+                if(app.data.indices[base].length === 1){
+                    console.log(base);
+                    console.log(dur);
+                    minTime = dur;
+                    index = i;
+                    var url = check; 
+                }
+            }
+        }
+
+        var string = app.statements['minTime'];
+        
+        dur = dataProc.round(minTime/1000, 2);
+
+        return (index !== -1) ? string.format(url, dur): "";
     };
 
     return {
@@ -131,6 +159,7 @@ var history = (function(){
         buildVisitComp: buildVisitComp,
         buildWebTime: buildWebTime,
         fetchYoutube: fetchYoutube,
-        googEnergy:googEnergy
+        googEnergy:googEnergy, 
+        findMinTime:findMinTime
     }
 })();

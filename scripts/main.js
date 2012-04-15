@@ -44,6 +44,8 @@
     var moduleName = (function(){ 
         Method and variable definitions here...
         
+        var myPrivateVar = 42;
+
         var myPublicMethod = function(){
         
         };
