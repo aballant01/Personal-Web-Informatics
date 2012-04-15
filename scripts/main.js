@@ -1,84 +1,95 @@
-var app = (function(){
-    var data = {
-        'Default':'Testing'
-    };
+(function(){ 
+    /**
+    * This file combines the various scripts into one file 
+    * without needing to change much about the original 
+    * index.html file. If you create a new file, then you
+    * just need to add it to the modules string that's being
+    * passed as the first perameter, and without the .js 
+    * extension. Make sure there's a space in front of it 
+    * too. 
+    *
+    * 
 
-    if(localStorage['web_informatics_data']){
-        data = JSON.parse(localStorage['web_informatics_data']);
-    };
+    So there are a few reasons why I organize the javascript in the 
+    way that I am. There are some technical reasons, which generally
+    stem from wanting to limit the number of global variables and
+    functions, as well as organizational, in that I want classes of
+    methods and objects to be together rather than have everything in
+    one global family. 
+    
+    Functions
+    ---------
+    To that effect, declaring functions like this:
 
-    var base_url_pattern = '/^http[s]?:\/\/([a-zA-Z\.-]+)/';
+    function functionName(){}
 
-    var re = /^http[s]?:\/\/([a-zA-Z\.-]+)/;
+    makes that function a global function - it can be declared from
+    anywhere just by going functionName(). Declaring them as I do, like:
+    
+    var functionName = function(){}
 
-    return {
-        data:data,
-        re : re
-    };
-})();
+    instead makes the function local to the scope that it is declared in. 
+    This way, I can have my functions encapsulated within their respective
+    modules, without the ability of everything to perhaps use or misuse
+    the function if I wasn't careful about how I was naming things. 
 
-var history = (function(){
-    var buildHistory = function(){
+    Modules
+    ---------
+    The way I organize things is by using the "Module Pattern". The
+    general benefit to using modules is that you can create a mix of
+    public and private functions and variables, and then you can have
+    related sets of functionality grouped together. Modules are declared
+    like this:
+    ----------------
+    var moduleName = (function(){ 
+        Method and variable definitions here...
         
-        app.data['history'] = getUrls();
-    };
-
-    var getUrls = function(){
-        /*Find way to get search across many days*/
-        chrome.history.search({
-                text : "alistair.ballantine", 
-                maxResults : 2000, 
-                startTime : 0,
-                endTime:(new Date()).getTime()
-            }, function(hisItems){
-            console.log(hisItems);
-        });
-    };
-
-    return {
-        build:buildHistory
-    }
-})();
-
-var bookmarks = (function(){
-
-
-    var build = function(){
+        var myPublicMethod = function(){
         
-        chrome.bookmarks.getTree(function(treeNodes){
-            var bookmarkInfo = buildHelper(treeNodes);
-            console.log(bookmarkInfo);
-        });
-    };
-
-    var buildHelper = function( node,  bookmarkInfo ){
-        if(typeof bookmarkInfo === 'undefined'){
-            console.log(node);
-            console.log("bookmark undefined");
-            bookmarkInfo = [];
-            console.log(typeof bookmarkInfo);
         };
 
-        console.log(node);
-        if(node.url){
-            console.log("Node URL");
-            bookmarkInfo.push(node);
-            return bookmarkInfo;
-        };
+        var myPrivateMethod = function(){
+    
+        }    
         
+        return{
+            myPublicMethod : myPublicMethod
+        }
+    })();
+    ----------------
 
-        return bookmarkInfo;
-    };
+    In the above example, you would be able to call the myPublicMethod
+    by calling moduleName.myPublicMethod, but outside of the module 
+    you would not be able to access myPrivateMethod. To be able to
+    access myPrivateMethod, you would have to add it to the return
+    statement, so the return statement would look like this:
 
-    return {
-        build : build
+    return{
+        myPublicMethod : myPublicMethod,
+        myPrivateMethod: myPrivateMethod
     }
 
+    Now I would be able to call moduleName.myPrivateMethod() and
+    encounter no issues. 
+
+    Require
+    --------
+    So I've split this up into several files, each one representing
+    one module - if we need more modules, feel free to add it to the
+    string below and create the file for it. 
+    */
+
+    var modules = "app dataproc history bookmarks";
+    
+    // Load the selected module
+    require(modules.split(" "), function(){
+            // When loaded, run the initialize function. 
+            initialize();
+        }
+    );
+
+    var initialize = function(){
+        bookmarks.build();
+        app.addInformatics();
+    };
 })();
-
-
-
-window.onload = function(){
-    //history.build();
-    bookmarks.build();
-};
