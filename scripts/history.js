@@ -159,43 +159,43 @@ var history = (function(){
 		var firstDate;
 		var time = 0;
 		var num = 0; 
-        var index = app.data.indices['www.facebook.com'];
-        for (var i = 0; i < index.length; i++) {
-            var currItem = app.data.history[index[i]];
-            if (currItem){
+		var index = app.data.indices['www.facebook.com'];
+		for (var i = 0; i < index.length; i++) {
+		var currItem = app.data.history[index[i]];
+			if (currItem){
 				if (i == 0) {
 					firstDate = new Date(currItem.startTime);
 				}
-                time += currItem.duration;
-                num += 1;
-            }
-        }
+				time += currItem.duration;
+				num += 1;
+			}
+		}
 		
 		// Format and return statement
 		var str = app.statements['facebook'];
 		var visits = num
 		var hours = dataProc.round(time/3600000,2);
-        return str.format(visits, hours, firstDate);
+		return str.format(visits, hours, firstDate);
 		
-    };
+	};
 	
 		
 	var fetchFacebookMostFrequentPage = function() {
 		
 		// Get duration for each facebook page
 		var facebookPages = Object();
-        var index = app.data.indices['www.facebook.com'];
-        for (var i = 0; i < index.length; i++) {
-            var currItem = app.data.history[index[i]];
-            if (currItem){
+		var index = app.data.indices['www.facebook.com'];
+		for (var i = 0; i < index.length; i++) {
+			var currItem = app.data.history[index[i]];
+			if (currItem){
 				if (facebookPages[currItem.url]) {
 					facebookPages[currItem.url] += currItem.duration;
 				}
 				else {
 					facebookPages[currItem.url] = currItem.duration;
 				}
-            }
-        }
+			}
+		}
 		
 		// Find page with most time that is not the main page
 		var max = 0;
@@ -209,31 +209,31 @@ var history = (function(){
 		
 		// Format and return statement
 		var str = app.statements['facebookPages'];
-        return str.format(maxPage);
+		return str.format(maxPage);
 		
-    };
+	};
 	
 	var googleOrFacebook = function() {
 		
 		// Get Facebook total time
 		var facebookTime = 0;
-        var facebookIndex = app.data.indices['www.facebook.com'];
-        for (var i = 0; i < facebookIndex.length; i++) {
-            var currItem = app.data.history[facebookIndex[i]];
-            if (currItem){
-                facebookTime += currItem.duration;
-            }
-        }
+		var facebookIndex = app.data.indices['www.facebook.com'];
+		for (var i = 0; i < facebookIndex.length; i++) {
+			var currItem = app.data.history[facebookIndex[i]];
+			if (currItem){
+				facebookTime += currItem.duration;
+			}
+		}
 		
 		// Get Google total time
 		var googleTime = 0;
-        var googleIndex = app.data.indices['www.google.com'];
-        for (var i = 0; i < googleIndex.length; i++) {
-            var currItem = app.data.history[googleIndex[i]];
-            if (currItem){
-                googleTime += currItem.duration;
-            }
-        }
+		var googleIndex = app.data.indices['www.google.com'];
+		for (var i = 0; i < googleIndex.length; i++) {
+			var currItem = app.data.history[googleIndex[i]];
+			if (currItem){
+				googleTime += currItem.duration;
+			}
+		}
 		
 		// Format and return statement
 		var str = app.statements['googleOrFacebook'];
@@ -253,7 +253,7 @@ var history = (function(){
 			return str.format('Google', 'Facebook', percent);
 		}
 		
-    };
+	};
 
     return {
         getTime : getTime,

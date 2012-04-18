@@ -73,9 +73,9 @@ var app = (function(){
         
         "minTime"           : "Do you remember {0}? Probably not, you were only there for {1} seconds" ,
 		
-		"facebook"     		: "Time to fess up your facebook-time: {0} visits and {1} hours of facebook prowling since {2}.",
+		"facebook"			: "Time to fess up your facebook-time: {0} visits and {1} hours of facebook prowling since {2}.",
 		
-		"facebookPages"     : "Out of all the times you\'ve been on facebook, you are most likely to be on {0}.",
+		"facebookPages"		: "Out of all the times you\'ve been on facebook, you are most likely to be on {0}.",
 		
 		"googleOrFacebook"	: "Google or facebook? {0} of course! Your time on {0} is {2}% greater than your time on {1}."
     };
