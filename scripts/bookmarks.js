@@ -68,7 +68,7 @@ var bookmarks = (function(){
     };
 
     var getCount = function(type){
-        return countInfo[type];
+        return app.statements.rawBookmarks.format(countInfo[type]);
     }
 
     return {
