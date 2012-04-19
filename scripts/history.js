@@ -11,7 +11,10 @@ var history = (function(){
 
         var div = len / app.compareItems['num1994Websites'];
 
-        return app.statements['num1994WebDev'].format(dataProc.round(div, 2));
+        return [
+            app.statements['num1994WebDev'].format(dataProc.round(div, 2)),
+            "boxOrangeBang.png"
+        ];
         
     };
 
@@ -39,13 +42,15 @@ var history = (function(){
         console.log(times[0].length);
         console.log(times[1].length);
 
-        return app.statements['siteVisitCountComp']
-            .format(
+        return [
+            app.statements['siteVisitCountComp'].format(
                 url,
                 times[0].length/times[1].length,
                 "today", 
                 "yesterday" 
-            );
+            ),
+            "pie.png"
+        ];
     };
 
     /**
@@ -111,7 +116,10 @@ var history = (function(){
         var time = getTime();
         var timecomp = time/app.compareItems['apollo11Length'];        
 
-        return app.statements['apollo11Length'].format("the web", dataProc.round(timecomp,3));
+        return [
+            app.statements['apollo11Length'].format("the web", dataProc.round(timecomp,3)),
+            "rocket.png"
+        ];
     };
 
     /**
@@ -146,7 +154,10 @@ var history = (function(){
         }
         var statement = app.statements.youtubeVideos.
             format(dataProc.round(data[dataType]/3600000,2));
-        return statement;
+        return [
+            statement,
+            "BarTWO.png"
+        ];
     };
 
     /**
@@ -174,7 +185,10 @@ var history = (function(){
         }
         var googEnergy = app.compareItems['googleSearchEnergyKWh'] * count;
         
-        return app.statements['googEnergyDev'].format(dataProc.round(googEnergy,2));
+        return [
+            app.statements['googEnergyDev'].format(dataProc.round(googEnergy,2)),
+            "village.png"
+        ];
 
     };
 
@@ -212,8 +226,11 @@ var history = (function(){
         var string = app.statements['minTime'];
         
         dur = dataProc.round(minTime/1000, 2);
-
-        return (index !== -1) ? string.format(url, dur): "";
+        var statement = (index !== -1) ? string.format(url, dur): "";
+        return [
+            statement,
+            "BarThree.png"
+        ];
     };
 	
 	var fetchFacebook = function(){
@@ -238,7 +255,10 @@ var history = (function(){
 		var str = app.statements['facebook'];
 		var visits = num
 		var hours = dataProc.round(time/3600000,2);
-		return str.format(visits, hours, firstDate);
+		return [
+            str.format(visits, hours, firstDate),
+            "boxOrange.png"
+        ];
 		
 	};
 	
@@ -272,7 +292,10 @@ var history = (function(){
 		
 		// Format and return statement
 		var str = app.statements['facebookPages'];
-		return str.format(maxPage);
+		return [
+            str.format(maxPage),
+            "BarTWO.png"
+        ];
 		
 	};
 	
@@ -303,17 +326,31 @@ var history = (function(){
 		
 		if (facebookTime > googleTime) {
 			if (googleTime == 0) {
-				return str.format('Facebook', 'Google', 'infinite');
+				return [
+                    str.format('Facebook', 'Google', 'infinite'),
+                    "pie.png"
+                ];
 			}
 			var percent = dataProc.round((facebookTime - googleTime)/googleTime*100, 0);
-			return str.format('Facebook', 'Google', percent);
+			
+            return [
+                str.format('Facebook', 'Google', percent),
+                "pie.png"
+            ];
 		}
 		else {
 			if (facebookTime == 0) {
-				return str.format('Google', 'Facebook', 'infinite');
+				return [
+                    str.format('Google', 'Facebook', 'infinite'),
+                    "pie.png"
+                ];
 			}
 			var percent = dataProc.round((googleTime - facebookTime)/facebookTime*100, 0);
-			return str.format('Google', 'Facebook', percent);
+			
+            return [
+                str.format('Google', 'Facebook', percent),
+                "pie.png"
+            ];
 		}
 		
 	};
@@ -352,8 +389,10 @@ var history = (function(){
         duration = duration / 3600000;
         duration = dataProc.round(duration, 2);
 
-        return app.statements['ambiWebTime']
-            .format(app.data.indices[topDomain].length, duration);
+        return [
+            app.statements['ambiWebTime'].format(app.data.indices[topDomain].length, duration),
+            "pie.png"
+        ]
     };
 
     /**
@@ -380,7 +419,10 @@ var history = (function(){
 
         var comparison = (edu > com) ? "must be" : "must not be";
 
-        return app.statements['comVersusEdu'].format(edu, com, comparison);
+        return [
+            app.statements['comVersusEdu'].format(edu, com, comparison),
+            "pie.png"
+        ];
 
     };
 
@@ -433,9 +475,12 @@ var history = (function(){
             }
         }
 
-        return app.statements['findFavImgType'].format(
-            imgOrder[0], imgOrder[1], imgOrder[2]
-        );
+        return [
+            app.statements['findFavImgType'].format(
+                imgOrder[0], imgOrder[1], imgOrder[2]
+            ),
+            "pie.png"
+        ];
     };
 
     /**
@@ -458,7 +503,10 @@ var history = (function(){
         var hours = dataProc.round(numMins/60, 0);
         var minutes = dataProc.round(numMins%60, 2);
 
-        return app.statements['websiteMarathon'].format(hours, minutes);
+        return [
+            app.statements['websiteMarathon'].format(hours, minutes),
+            "boxBlueBang.png"
+        ];
     };
 
     return {

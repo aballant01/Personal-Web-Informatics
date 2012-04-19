@@ -94,7 +94,7 @@ var app = (function(){
 
     var $container = $('#container');
     var $infoItem = $("<div class = 'info_item'></div>");
-    var $infoP = $("<p class='float_left'></p>");
+    var $infoP = $("<p class='float_right'></p>");
     
     
     /**
@@ -167,11 +167,19 @@ var app = (function(){
     * @param {width} The class to define the width of the
     *   added element. Can be 'thin', 'wide', or 'full' 
     */
-    var addBodyElem = function(statementText){
+    var addBodyElem = function(statement){
+        statementText = statement[0];
+        statementImg = statement[1];
+        $img = $("<img class = 'float_left' src = '' alt = 'Personal Web Informatics' />");
+
         $container.append(
-            $infoItem.clone().append(
-                $infoP.clone().text(statementText)
-            )
+            $infoItem.clone()
+                .append(
+                    $img.clone().attr('src', "assets/" + statementImg)  
+                )
+                .append(
+                    $infoP.clone().text(statementText)
+                )
         )
     };
 

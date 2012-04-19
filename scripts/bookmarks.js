@@ -65,10 +65,15 @@ var bookmarks = (function(){
             'count' : count, 
             'pct'   : count/l1
         }
+
+        console.log(countInfo['pct']);
     };
 
     var getCount = function(type){
-        return app.statements.rawBookmarks.format(countInfo[type]);
+        return [
+            app.statements.rawBookmarks.format(countInfo[type]),
+            "pie.png"
+        ];
     }
 
     return {

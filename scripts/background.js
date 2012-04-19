@@ -1,3 +1,4 @@
+
 String.prototype.startsWith = function(str){
     return this.substring(0,str.length) === str;
 };
@@ -7,12 +8,11 @@ String.prototype.endsWith = function(str){
 };
 
 var app = (function(){
-
+    var data = {}
     var init = function(){
         if(localStorage['web_informatics_data']){
             data = JSON.parse(localStorage['web_informatics_data']);
         }else{
-            data = {};
             data['history'] = [];
             data['bookmarks'] = [];
             data['indices'] = {};
