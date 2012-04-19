@@ -6,7 +6,7 @@ var history = (function(){
     * web visits 
     */
     var fetchTotalWebVisits = function(){
-        var $p = app.$infoP.clone();
+        
         var len = app.data.history.length;
 
         var div = len / app.compareItems['num1994Websites'];
@@ -23,14 +23,21 @@ var history = (function(){
     };
     
     /**
-    * 
+    * Compares the number of times that a site has been 
+    * visited in the current time period versus the previous
+    * time period
+    *
+    * @param {url} The BaseURL (domain url) to check the usage
+    *   against the time periods
     */
-    var buildVisitComp = function(url){
+    var buildVisitComp = function(url, interval){
         var $p = app.$infoP.clone();
         var day = (new Date()).getDate();
 
         var index = app.data.indices[url];
-        var times = visitCompHelperDay(index);
+        var times = visitCompHelperDay(index, interval || "day");
+        console.log(times[0].length);
+        console.log(times[1].length);
 
         return app.statements['siteVisitCountComp']
             .format(
@@ -41,12 +48,33 @@ var history = (function(){
             );
     };
 
-    var visitCompHelperDay = function(arr){
+    /**
+    * Helper to the buildVisitComp function - retrieves the
+    * total comparative time for a given array of items
+    * and the selected time period - defaults to comparison
+    * between days
+    *
+    * @param {arr} The array index to retrieve duration information
+    *   from
+    * @param {interval} The string representation of the time 
+    *   period to make comparison for - "day", "week", or "month"
+    *
+    * @return: A two element array of the current time period duration
+    *   and the previous time period duration
+    */
+    var visitCompHelperDay = function(arr, interval){
         var today = (new Date()).getDate();
         var now = Date.now();
         var curr = [];
         var past = [];
-        var dayLen = 86400000;
+        var intervals = {
+            "day"   : 86400000,
+            "week"  : 604800000,
+            "month" : 2419200000
+        };
+
+        interval = interval || "day";
+        var timeLen = (interval) ? intervals[interval] : 86400000;
 
         for(var i = 0, len = arr.length; i < len; i++){
             var currItem = app.data.history[arr[i]];
@@ -55,10 +83,10 @@ var history = (function(){
                 continue;
             }
             
-            if (currItem.startTime >= (now - dayLen)){
+            if (currItem.startTime >= (now - timeLen)){
                 curr.push(app.data.history[arr[i]]);
-            }else if(currItem.startTime < (now - dayLen) && 
-                currItem.startTime >= (now - (dayLen*2))){
+            }else if(currItem.startTime < (now - timeLen) && 
+                currItem.startTime >= (now - (timeLen*2))){
                 past.push(app.data.history[arr[i]]);
             }
         }
@@ -68,7 +96,14 @@ var history = (function(){
     };
 
     /**
+    * Retreives the total duration spent on the web
+    * by a user. Calculated by total time spent on open
+    * tabs, so not necessarily accurate because the duration
+    * will be adding up in multiple places at once if the
+    * user has several tabs open. 
     * 
+    * @return The statement string for how long the user has
+    *   spent on the web (currently Apollo 11);
     */
     var buildWebTime = function(){
         var $p = app.$infoP.clone();
@@ -79,14 +114,27 @@ var history = (function(){
         return app.statements['apollo11Length'].format("the web", dataProc.round(timecomp,3));
     };
 
-    var fetchYoutube = function(dataType){
+    /**
+    * Retrieves the number of hours spent on YouTube
+    * and returns the statement for youtube time. Does
+    * not strictly represent time watching videos; rather
+    * it represents time spent on the YouTube Site 
+    *
+    * NOTE: This could be made into it's own informative function, 
+    * as it retrieves data in a helpful manner
+    *
+    * @return The YouTube statment string with the number of
+    *   hours spent on youtube. 
+    */
+    var fetchYoutube = function(dataType, url){
         var data = {
             'time' : 0,
             'num'  : 0,
             'objs' : []
         }
+        url = url || "www.youtube.com";
 
-        var index = app.data.indices['www.youtube.com'];
+        var index = app.data.indices[url];
 
         for(var i = 0, l = index.length; i < l; i++){
             currItem = app.data.history[index[i]];
@@ -96,11 +144,19 @@ var history = (function(){
                 data.objs.push(currItem);
             }
         }
-        var state = app.statements.youtubeVideos.
+        var statement = app.statements.youtubeVideos.
             format(dataProc.round(data[dataType]/3600000,2));
-        return state;
+        return statement;
     };
 
+    /**
+    * Calculates the amount of energy that has been
+    * used in Google searches based upon a Google Blog 
+    * post and returns the statement string representing
+    * that information. 
+    *
+    * @return The Google Energy statement string
+    */
     var googEnergy = function(){
         var urlRe = /www.google.com\/search/;
 
@@ -122,6 +178,14 @@ var history = (function(){
 
     };
 
+    /**
+    * Finds a website that the user has visited only once 
+    * and for the shortest period of time, and returns the 
+    * statment representing that information. 
+    * 
+    * The base limit for the shortest website is 10 seconds
+    * 
+    */
     var findMinTime = function(){
 
         var len = app.data.history.length, 
@@ -137,8 +201,7 @@ var history = (function(){
                 var base = dataProc.getBaseURL(check);
 
                 if(app.data.indices[base].length === 1){
-                    console.log(base);
-                    console.log(dur);
+                    
                     minTime = dur;
                     index = i;
                     var url = check; 
@@ -255,16 +318,166 @@ var history = (function(){
 		
 	};
 
+    /**
+    * Finds the most visited/most time visited website and
+    * returns the ambiguous fact for that website. 
+    *
+    * @return The statement string for the most visited 
+    *   ambiguous fact
+    */ 
+    var ambiWebTime = function ambiWebTime(){
+        var duration = 0;
+        var topDomain = "";
+        var siteIndex = {};
+        
+        // For each item in the history list
+        for( var i = 0, l = app.data.history.length; i < l; i++ ){
+            var item = app.data.history[i];
+            var domain = item.baseURL;
+
+            if(!siteIndex[domain]){
+                siteIndex[domain] = 0;
+            }
+            // Increment the amount of time spent on the website
+            siteIndex[domain] += item.duration;
+
+            // If it's greater than the previous high point
+            if(siteIndex[domain] > duration){
+                // Set this as the top website
+                duration = siteIndex[domain];
+                topDomain = domain;
+            }
+        }
+
+        duration = duration / 3600000;
+        duration = dataProc.round(duration, 2);
+
+        return app.statements['ambiWebTime']
+            .format(app.data.indices[topDomain].length, duration);
+    };
+
+    /**
+    * Finds the number of .com sites visited versus the
+    * number of .edu sites visited and compares the two
+    * of them. 
+    *
+    * @return The .com versus .edu statement that compares
+    *   the usage between the two. 
+    */
+    var comVersusEdu = function comVersusEdu(){
+        var hist = app.data.history;
+        var com = 0, 
+            edu = 0;
+
+        for( var i = 0, l = hist.length; i < l; i++){
+            if(hist[i].baseURL.endsWith(".edu")){
+                edu += 1;
+            
+            }else if(hist[i].baseURL.endsWith(".com")){
+                com += 1; 
+            }
+        }
+
+        var comparison = (edu > com) ? "must be" : "must not be";
+
+        return app.statements['comVersusEdu'].format(edu, com, comparison);
+
+    };
+
+    /**
+    * Finds the most frequent types of images viewed by the user
+    * out of pdfs, pngs, and jpgs. Sorts them by descending size
+    * and returns the statment comparing the usage of types
+    */
+    var findFavImgType = function findFavImgType(){
+        var png = 0,
+            jpg = 0,
+            pdf = 0;
+
+        var imgs = [
+            0, //png 
+            0, //jpg
+            0  //pdf
+        ];
+
+        for( var i = 0, l = app.data.history.length; i < l; i++){
+            var url = app.data.history[i].url;
+
+            if(url.endsWith('.png')){
+                png += 1;
+                imgs[0] += 1;
+            }else if(url.endsWith('.jpg')){
+                jpg += 1;
+                imgs[1] += 1;
+            }else if(url.endsWith('.pdf')){
+                pdf += 1;
+                imgs[2] += 1;
+            }
+        }
+       
+        imgs = imgs.sort(function numOrdA(a, b){ return (b-a); });
+
+        var imgOrder = [];
+        for(var i = 0; i < 3; i++){
+            
+            switch(imgs[i]){
+                case png:
+                    imgOrder.push('.png');
+                    break;
+                case jpg:
+                    imgOrder.push('.jpg');
+                    break;
+                case pdf:
+                    imgOrder.push('.pdf');
+                    break;
+            }
+        }
+
+        return app.statements['findFavImgType'].format(
+            imgOrder[0], imgOrder[1], imgOrder[2]
+        );
+    };
+
+    /**
+    * Finds the longest single strech on one specific website
+    * visit (unique URL) and converts the length of time into
+    * hours and minutes and returns the formatted statement
+    */
+    var websiteMarathon = function(){
+        var maxDuration = 0;
+
+        for(var i = 0, l = app.data.history.length; i < l; i++){
+            currDuration = app.data.history[i].duration;
+            if(currDuration > maxDuration){
+                maxDuration = currDuration;
+            }
+        }
+
+        var numMins = maxDuration / 60000;
+        
+        var hours = dataProc.round(numMins/60, 0);
+        var minutes = dataProc.round(numMins%60, 2);
+
+        return app.statements['websiteMarathon'].format(hours, minutes);
+    };
+
     return {
-        getTime : getTime,
+        getTime     : getTime,
         fetchTotalWebVisits : fetchTotalWebVisits,
-        buildVisitComp: buildVisitComp,
-        buildWebTime: buildWebTime,
-        fetchYoutube: fetchYoutube,
-        googEnergy:googEnergy, 
-        findMinTime:findMinTime,
-		fetchFacebook:fetchFacebook,
+        buildVisitComp      : buildVisitComp,
+        buildWebTime        : buildWebTime,
+        fetchYoutube        : fetchYoutube,
+        googEnergy          : googEnergy, 
+        findMinTime         : findMinTime,
+		fetchFacebook       : fetchFacebook,
+
 		fetchFacebookMostFrequentPage:fetchFacebookMostFrequentPage,
-		googleOrFacebook:googleOrFacebook
+		
+        googleOrFacebook    : googleOrFacebook,
+        ambiWebTime         : ambiWebTime,
+        comVersusEdu        : comVersusEdu,
+        findFavImgType      : findFavImgType,
+        websiteMarathon     : websiteMarathon
+
     }
 })();

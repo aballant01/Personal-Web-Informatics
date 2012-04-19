@@ -77,7 +77,19 @@ var app = (function(){
 		
 		"facebookPages"		: "Out of all the times you\'ve been on facebook, you are most likely to be on {0}.",
 		
-		"googleOrFacebook"	: "Google or facebook? {0} of course! Your time on {0} is {2}% greater than your time on {1}."
+		"googleOrFacebook"	: "Google or facebook? {0} of course! Your time on {0} is {2}% greater than your time on {1}.",
+
+        "ambiWebTime"       : "Did you know there's a site you've visited {0} times for {1} hours?",
+
+        "comVersusEdu"      : "Ratio of .edu to .com? {0} to {1}. You {2} a scholar",
+
+        "findFavImgType"    : "You are more likely to open a {0} than to a {1}, and more likely to open a " +
+            "{1} than a {2}. Interesting.",
+
+        "websiteMarathon"   : "Marathon challenge: you've been on one website for a record of " + 
+            "{0} hours and {1} minutes. Can you beat it?"
+    
+
     };
 
     var $container = $('#container');
@@ -131,7 +143,15 @@ var app = (function(){
 			
 			history.fetchFacebookMostFrequentPage,
 			
-			history.googleOrFacebook
+			history.googleOrFacebook, 
+
+            history.ambiWebTime,
+
+            history.comVersusEdu,
+
+            history.findFavImgType,
+
+            history.websiteMarathon
         ];
 
         return appFunctions;
