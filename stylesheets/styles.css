@@ -66,6 +66,7 @@ body, html {
 .info_item img {
 	max-height:100%;
 	max-width:20%;
+	vertical-align:middle;
 }
 
 .info_item p {
