@@ -152,6 +152,108 @@ var history = (function(){
 
         return (index !== -1) ? string.format(url, dur): "";
     };
+	
+	var fetchFacebook = function(){
+		
+		// Find duration and number of visits for facebook
+		var firstDate;
+		var time = 0;
+		var num = 0; 
+		var index = app.data.indices['www.facebook.com'];
+		for (var i = 0; i < index.length; i++) {
+		var currItem = app.data.history[index[i]];
+			if (currItem){
+				if (i == 0) {
+					firstDate = new Date(currItem.startTime);
+				}
+				time += currItem.duration;
+				num += 1;
+			}
+		}
+		
+		// Format and return statement
+		var str = app.statements['facebook'];
+		var visits = num
+		var hours = dataProc.round(time/3600000,2);
+		return str.format(visits, hours, firstDate);
+		
+	};
+	
+		
+	var fetchFacebookMostFrequentPage = function() {
+		
+		// Get duration for each facebook page
+		var facebookPages = Object();
+		var index = app.data.indices['www.facebook.com'];
+		for (var i = 0; i < index.length; i++) {
+			var currItem = app.data.history[index[i]];
+			if (currItem){
+				if (facebookPages[currItem.url]) {
+					facebookPages[currItem.url] += currItem.duration;
+				}
+				else {
+					facebookPages[currItem.url] = currItem.duration;
+				}
+			}
+		}
+		
+		// Find page with most time that is not the main page
+		var max = 0;
+		var maxPage;
+		for (var page in facebookPages) {
+			if (page != 'http://www.facebook.com/' && page.indexOf('www.facebook.com') != -1 && facebookPages[page] > max) {
+				maxPage = page;
+				max = facebookPages[page];
+			}
+		}
+		
+		// Format and return statement
+		var str = app.statements['facebookPages'];
+		return str.format(maxPage);
+		
+	};
+	
+	var googleOrFacebook = function() {
+		
+		// Get Facebook total time
+		var facebookTime = 0;
+		var facebookIndex = app.data.indices['www.facebook.com'];
+		for (var i = 0; i < facebookIndex.length; i++) {
+			var currItem = app.data.history[facebookIndex[i]];
+			if (currItem){
+				facebookTime += currItem.duration;
+			}
+		}
+		
+		// Get Google total time
+		var googleTime = 0;
+		var googleIndex = app.data.indices['www.google.com'];
+		for (var i = 0; i < googleIndex.length; i++) {
+			var currItem = app.data.history[googleIndex[i]];
+			if (currItem){
+				googleTime += currItem.duration;
+			}
+		}
+		
+		// Format and return statement
+		var str = app.statements['googleOrFacebook'];
+		
+		if (facebookTime > googleTime) {
+			if (googleTime == 0) {
+				return str.format('Facebook', 'Google', 'infinite');
+			}
+			var percent = dataProc.round((facebookTime - googleTime)/googleTime*100, 0);
+			return str.format('Facebook', 'Google', percent);
+		}
+		else {
+			if (facebookTime == 0) {
+				return str.format('Google', 'Facebook', 'infinite');
+			}
+			var percent = dataProc.round((googleTime - facebookTime)/facebookTime*100, 0);
+			return str.format('Google', 'Facebook', percent);
+		}
+		
+	};
 
     return {
         getTime : getTime,
@@ -160,6 +262,9 @@ var history = (function(){
         buildWebTime: buildWebTime,
         fetchYoutube: fetchYoutube,
         googEnergy:googEnergy, 
-        findMinTime:findMinTime
+        findMinTime:findMinTime,
+		fetchFacebook:fetchFacebook,
+		fetchFacebookMostFrequentPage:fetchFacebookMostFrequentPage,
+		googleOrFacebook:googleOrFacebook
     }
 })();
