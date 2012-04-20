@@ -266,7 +266,7 @@ var history = (function(){
 	var fetchFacebookMostFrequentPage = function() {
 		
 		// Get duration for each facebook page
-		var facebookPages = Object();
+		var facebookPages = new Object();
 		var index = app.data.indices['www.facebook.com'];
 		for (var i = 0; i < index.length; i++) {
 			var currItem = app.data.history[index[i]];
@@ -508,7 +508,129 @@ var history = (function(){
             "boxBlueBang.png"
         ];
     };
-
+	
+	var mostTabDayOfWeek = function(){
+		
+		// Find number of entries for each day of week
+		var weekList = new Array(0, 0, 0, 0, 0, 0, 0);
+		for (var i = 0; i < app.data.history.length; i++) {
+			var currItem = app.data.history[i];
+			if (currItem){
+				var startDate = new Date(currItem.startTime);
+				weekList[startDate.getDay()] += 1;
+			}
+		}
+		
+		// Find the day of week with most entries
+		var maxIndex = 0;
+		var maxNum = 0;
+		for (var i = 0; i < weekList.length; i++) {
+			if (weekList[i] > maxNum) {
+				maxIndex = i;
+				maxNum = weekList[i];
+			}
+		}
+		
+		// Format and return statement
+		var str = app.statements['mostTabDayOfWeek'];
+		return [
+                str.format(dataProc.getDayOfWeek(maxIndex)),
+                "BarTWO.png"
+            ];
+		
+	};
+	
+	var mostTimeDayOfWeek = function(){
+		
+		// Find number of entries for each day of week
+		var weekList = new Array(0, 0, 0, 0, 0, 0, 0);
+		for (var i = 0; i < app.data.history.length; i++) {
+			var currItem = app.data.history[i];
+			if (currItem){
+				var startDate = new Date(currItem.startTime);
+				weekList[startDate.getDay()] += currItem.duration;
+			}
+		}
+		
+		// Find the day of week with most entries
+		var maxIndex = 0;
+		var maxTime = 0;
+		for (var i = 0; i < weekList.length; i++) {
+			if (weekList[i] > maxTime) {
+				maxIndex = i;
+				maxTime = weekList[i];
+			}
+		}
+		
+		// Format and return statement
+		var str = app.statements['mostTimeDayOfWeek'];
+		return [
+                str.format(dataProc.getDayOfWeek(maxIndex)),
+                "BarTWO.png"
+            ];
+		
+	};
+	
+	var overallTimeNum = function(){
+		
+		// Find first date, total time, and total number of sites
+		var totalInterval;
+		var websites = new Object();
+		var websiteCout = 0;
+		var durationList = new Array();
+		for (var i = 0; i < app.data.history.length; i++) {
+			var currItem = app.data.history[i];
+			if (currItem){
+				if (i == 0) {
+					totalInterval = Date.now() - currItem.startTime;
+				}
+				
+				// Add duration to the list and combine overlapped durations
+				var combined = false;
+				for (var j = 0; j < durationList.length; j++) {
+					var endTime = durationList[j].startTime + durationList[j].duration;
+					if (currItem.startTime >= durationList[j].startTime && currItem.startTime <= endTime) {
+						durationList[j].duration = currItem.startTime + currItem.duration - durationList[j].startTime;
+						endTime = durationList[j].startTime + durationList[j].duration;
+						if (j+1 < durationList.length) {
+							if (durationList[j+1].startTime <= endTime) {
+								durationList[j].duration = durationList[j+1].startTime + durationList[j+1].duration - durationList[j].startTime;
+								durationList.splice(j+1, 1);
+							}
+						}
+						combined = true;
+						break;
+					}
+				}
+				if (!combined) {
+					var newEntry = new Object();
+					newEntry.startTime = currItem.startTime;
+					newEntry.duration = currItem.duration;
+					durationList.push(newEntry);
+				}
+				
+				if (!websites[currItem.baseURL]) {
+					websites[currItem.baseURL] = true;
+					websiteCout++;
+				}
+			}
+		}
+		
+		// Sum up durations in the list
+		var totalTime = 0;
+		for (var i = 0; i < durationList.length; i++) {
+			totalTime += durationList[i].duration;
+		}
+		
+		// Format and return statement
+		var str = app.statements['overallTimeNum'];
+		return [
+                str.format(dataProc.round(totalInterval/86400000, 2), dataProc.round(totalTime/3600000, 2), websiteCout),
+                "BarTWO.png"
+            ];
+		
+	};
+	
     return {
         getTime     : getTime,
         fetchTotalWebVisits : fetchTotalWebVisits,
@@ -525,7 +647,10 @@ var history = (function(){
         ambiWebTime         : ambiWebTime,
         comVersusEdu        : comVersusEdu,
         findFavImgType      : findFavImgType,
-        websiteMarathon     : websiteMarathon
-
+        websiteMarathon     : websiteMarathon,
+		
+		mostTabDayOfWeek	: mostTabDayOfWeek,
+		mostTimeDayOfWeek	: mostTimeDayOfWeek,
+		overallTimeNum		: overallTimeNum
     }
 })();

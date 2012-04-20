@@ -81,12 +81,33 @@ var dataProc = (function(){
             return path[0];
         };   
     };
-
+	
+	/**
+	* Conert int into day of week
+	*
+	*@param { num } the integer that represnts day of week
+	*@return the string version of day of week
+	*/
+	var getDayOfWeek = function ( num ) {
+		var weekday = new Array(7);
+		weekday[0] = "Sunday";
+		weekday[1] = "Monday";
+		weekday[2] = "Tuesday";
+		weekday[3] = "Wednesday";
+		weekday[4] = "Thursday";
+		weekday[5] = "Friday";
+		weekday[6] = "Saturday";
+		return weekday[num];
+	};
+	
+	
+	
     return{
         fetchTime : fetchTime,
         round : round,
         getRandomInt : getRandomInt,
         randArrayElem : randArrayElem,
-        getBaseURL : getBaseURL
+        getBaseURL : getBaseURL,
+		getDayOfWeek : getDayOfWeek
     }
 })();

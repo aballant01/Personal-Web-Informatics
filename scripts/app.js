@@ -87,9 +87,14 @@ var app = (function(){
             "{1} than a {2}. Interesting.",
 
         "websiteMarathon"   : "Marathon challenge: you've been on one website for a record of " + 
-            "{0} hours and {1} minutes. Can you beat it?"
-    
-
+            "{0} hours and {1} minutes. Can you beat it?",
+			
+		"mostTabDayOfWeek"	: "You open the most tabs on {0}.",
+		
+		"mostTimeDayOfWeek"	: "Lonely {0}s? You spend the most time online on {0}.",
+		
+		"overallTimeNum"	: "Did you know that we've been recording your activity for {0} days. " +
+			"In that time, we've seen you online for {1} hours, and recorded more than {2} sites you've visited."
     };
 
     var $container = $('#container');
@@ -151,7 +156,13 @@ var app = (function(){
 
             history.findFavImgType,
 
-            history.websiteMarathon
+            history.websiteMarathon,
+			
+			history.mostTabDayOfWeek,
+			
+			history.mostTimeDayOfWeek,
+			
+			history.overallTimeNum
         ];
 
         return appFunctions;
