@@ -11,8 +11,14 @@ var history = (function(){
 
         var div = len / app.compareItems['num1994Websites'];
 
+        var webVisits = dataProc.round(div, 2);
+
+        if(! dataProc.isNumeric(webVisits)){
+            throw new dataProc.NumericException();
+        }
+
         return [
-            app.statements['num1994WebDev'].format(dataProc.round(div, 2)),
+            app.statements['num1994WebDev'].format(webVisits),
             "boxOrangeBang.png"
         ];
         
@@ -41,6 +47,12 @@ var history = (function(){
         var times = visitCompHelperDay(index, interval || "day");
         console.log(times[0].length);
         console.log(times[1].length);
+
+        var num = times[0].length/times[1].length;
+
+        if(!dataProc.isNumeric(num)){
+            throw new dataProc.NumericException();
+        }
 
         return [
             app.statements['siteVisitCountComp'].format(
@@ -116,6 +128,10 @@ var history = (function(){
         var time = getTime();
         var timecomp = time/app.compareItems['apollo11Length'];        
 
+        if(!dataProc.isNumeric(timecomp)){
+            throw new dataProc.NumericException();
+        }
+
         return [
             app.statements['apollo11Length'].format("the web", dataProc.round(timecomp,3)),
             "rocket.png"
@@ -152,8 +168,16 @@ var history = (function(){
                 data.objs.push(currItem);
             }
         }
+
+        var num = data[dataType]/3600000;
+
+        if(!dataProc.isNumeric(num)){
+            throw new dataProc.NumericException();
+        }
+
         var statement = app.statements.youtubeVideos.
-            format(dataProc.round(data[dataType]/3600000,2));
+            format(dataProc.round(num,2));
+        
         return [
             statement,
             "BarTWO.png"
@@ -185,8 +209,14 @@ var history = (function(){
         }
         var googEnergy = app.compareItems['googleSearchEnergyKWh'] * count;
         
+        var googNum = dataProc.round(googEnergy,2); 
+
+        if(!dataProc.isNumeric(googNum)){
+            throw new dataProc.NumericException();
+        }
+
         return [
-            app.statements['googEnergyDev'].format(dataProc.round(googEnergy,2)),
+            app.statements['googEnergyDev'].format(googNum),
             "village.png"
         ];
 
@@ -226,6 +256,11 @@ var history = (function(){
         var string = app.statements['minTime'];
         
         dur = dataProc.round(minTime/1000, 2);
+
+        if(!dataProc.isNumeric(dur)){
+            throw new dataProc.NumericException();
+        }
+
         var statement = (index !== -1) ? string.format(url, dur): "";
         return [
             statement,
@@ -389,6 +424,10 @@ var history = (function(){
         duration = duration / 3600000;
         duration = dataProc.round(duration, 2);
 
+        if(!dataProc.isNumeric(duration)){
+            throw new dataProc.NumericException();
+        }
+
         return [
             app.statements['ambiWebTime'].format(app.data.indices[topDomain].length, duration),
             "pie.png"
@@ -417,7 +456,9 @@ var history = (function(){
             }
         }
 
-        var comparison = (edu > com) ? "must be" : "must not be";
+        var comparison = (edu > (com * 0.15)) ? "must be" : "must not be";
+
+
 
         return [
             app.statements['comVersusEdu'].format(edu, com, comparison),
@@ -503,6 +544,10 @@ var history = (function(){
         var hours = dataProc.round(numMins/60, 0);
         var minutes = dataProc.round(numMins%60, 2);
 
+        if( ! dataProc.isNumeric(hours) || ! dataProc.isNumeric(minutes)){
+            throw new dataproc.NumericException();
+        }
+
         return [
             app.statements['websiteMarathon'].format(hours, minutes),
             "boxBlueBang.png"
@@ -531,10 +576,14 @@ var history = (function(){
 			}
 		}
 		
+        var dayNum = dataProc.getDayOfWeek(maxIndex);
+        if( !dataProc.isNumeric(dayNum) ){
+            throw new dataProc.NumericException();
+        }
 		// Format and return statement
 		var str = app.statements['mostTabDayOfWeek'];
 		return [
-                str.format(dataProc.getDayOfWeek(maxIndex)),
+                str.format(dayNum),
                 "BarTWO.png"
             ];
 		
@@ -562,6 +611,8 @@ var history = (function(){
 			}
 		}
 		
+
+
 		// Format and return statement
 		var str = app.statements['mostTimeDayOfWeek'];
 		return [
@@ -622,10 +673,22 @@ var history = (function(){
 			totalTime += durationList[i].duration;
 		}
 		
+        var timeData = [
+            dataProc.round(totalInterval/86400000, 2),
+            dataProc.round(totalTime/3600000, 2),
+            websiteCout
+        ];
+
+        for(var i = 0; i < 3; i++){
+            if(!dataProc.isNumeric(timeData[i])){
+                throw new dataProc.NumericException();
+            }
+        }
+
 		// Format and return statement
 		var str = app.statements['overallTimeNum'];
 		return [
-                str.format(dataProc.round(totalInterval/86400000, 2), dataProc.round(totalTime/3600000, 2), websiteCout),
+                str.format(timeData[0], timeData[1], timeData[2]),
                 "BarTWO.png"
             ];
 		

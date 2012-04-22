@@ -83,7 +83,7 @@ var dataProc = (function(){
     };
 	
 	/**
-	* Conert int into day of week
+	* Convert int into day of week
 	*
 	*@param { num } the integer that represnts day of week
 	*@return the string version of day of week
@@ -97,10 +97,37 @@ var dataProc = (function(){
 		weekday[4] = "Thursday";
 		weekday[5] = "Friday";
 		weekday[6] = "Saturday";
+
+        /*weekday = [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        ];*/
+
 		return weekday[num];
 	};
+
+    /**
+    * Checks if given value is a number type. 
+    *
+    * @param {n} the value to be tested
+    * @return True if n is a number, false otherwise
+    *
+    * Thanks to CMS on stack overflow here:
+    * http://stackoverflow.com/questions/18082/validate-numbers-in-javascript-isNumeric
+    */ 
+    var isNumeric = function isNumeric(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
 	
-	
+	var NumericException = function(message){
+        this.name = "Numeric Exception";
+        this.message = message || "Return value was not a number";
+    }
 	
     return{
         fetchTime : fetchTime,
@@ -108,6 +135,8 @@ var dataProc = (function(){
         getRandomInt : getRandomInt,
         randArrayElem : randArrayElem,
         getBaseURL : getBaseURL,
-		getDayOfWeek : getDayOfWeek
+		getDayOfWeek : getDayOfWeek,
+        isNumeric: isNumeric,
+        NumericException:NumericException
     }
 })();

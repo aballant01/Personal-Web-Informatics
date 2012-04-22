@@ -113,8 +113,14 @@ var app = (function(){
         var appFunctions = buildFunctionList();
 
         for(var i = 0, l = appFunctions.length; i < l; i++){
-            var elem = appFunctions[i]();
-            addBodyElem(elem);
+            try{
+                var elem = appFunctions[i]();
+                addBodyElem(elem);
+            }catch(e){
+                console.log(e);
+                console.log(appFunctions[i]);
+                continue;
+            }
         }
 
     };
