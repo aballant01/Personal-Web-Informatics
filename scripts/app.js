@@ -94,7 +94,9 @@ var app = (function(){
 		"mostTimeDayOfWeek"	: "Lonely {0}s? You spend the most time online on {0}.",
 		
 		"overallTimeNum"	: "Did you know that we've been recording your activity for {0} days. " +
-			"In that time, we've seen you online for {1} hours, and recorded more than {2} sites you've visited."
+			"In that time, we've seen you online for {1} hours, and recorded more than {2} sites you've visited.",
+
+        "topWebsites"       : "{0}, {1}, and {2} make up {3}% of your web browsing activity"
     };
 
     var $container = $('#container');
@@ -117,7 +119,7 @@ var app = (function(){
                 var elem = appFunctions[i]();
                 addBodyElem(elem);
             }catch(e){
-                console.log(e);
+                console.error(e);
                 console.log(appFunctions[i]);
                 continue;
             }
@@ -168,7 +170,9 @@ var app = (function(){
 			
 			history.mostTimeDayOfWeek,
 			
-			history.overallTimeNum
+			history.overallTimeNum,
+
+            history.topWebsites
         ];
 
         return appFunctions;

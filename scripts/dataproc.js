@@ -25,7 +25,11 @@ var dataProc = (function(){
         var len = (set) ? index.length : arr.length;
 
         for(var i = 0; i < len; i++){
-            dur += (set) ? arr[index[i]].duration : arr[i].duration;
+            try{
+                dur += (set) ? arr[index[i]].duration : arr[i].duration;
+            }catch(e){
+                dur += 0;
+            }
         }
 
         return dur; 
@@ -62,7 +66,11 @@ var dataProc = (function(){
     * @return The selected array element
     */
     var randArrayElem = function(arr){
-        return arr[0, getRandomInt(0,arr.length-1)];
+        return arr[getRandomInt(0,arr.length-1)];
+    };
+
+    var randArrayElemSub = function(arr, min, max){
+        return arr[getRandomInt(min, max)];
     };
 
     /**
@@ -137,6 +145,7 @@ var dataProc = (function(){
         getBaseURL : getBaseURL,
 		getDayOfWeek : getDayOfWeek,
         isNumeric: isNumeric,
-        NumericException:NumericException
+        NumericException:NumericException,
+        randArrayElemSub:randArrayElemSub
     }
 })();

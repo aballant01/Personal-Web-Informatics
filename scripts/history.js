@@ -693,6 +693,48 @@ var history = (function(){
             ];
 		
 	};
+
+
+    var topWebsites = function(){
+        var indices = app.data.indices;
+        var totalTime = 0;
+        var keys = [];
+        var sorted = [];        
+
+        for (var k in indices)keys.push(k);
+
+        for( var i = 0, l = keys.length; i < l; i++ ){
+            var time = dataProc.fetchTime(app.data.history, indices[keys[i]]);
+            totalTime += time;
+            sorted.push([keys[i], time])
+
+        }
+
+        sorted.sort(function(a, b) {return b[1] - a[1]})
+
+        var randNum = dataProc.randArrayElemSub(
+            Math.round(sorted.length - (sorted.length * 0.3)),
+            sorted.length - 1 
+        );
+        
+        var retElem = [
+            sorted[0],
+            sorted[2],
+            dataProc.randArrayElem(sorted)
+        ];
+        
+        var pct = (retElem[0][1] + retElem[1][1] + retElem[2][1]) / totalTime;
+
+        console.log(pct);
+
+        var str = app.statements["topWebsites"]
+            .format(retElem[0][0], retElem[1][0], retElem[2][0], dataProc.round(pct*100, 2) );
+
+        return [
+            str,
+            "pie.png"
+        ];
+    };
 	
     return {
         getTime     : getTime,
@@ -714,6 +756,7 @@ var history = (function(){
 		
 		mostTabDayOfWeek	: mostTabDayOfWeek,
 		mostTimeDayOfWeek	: mostTimeDayOfWeek,
-		overallTimeNum		: overallTimeNum
+		overallTimeNum		: overallTimeNum,
+        topWebsites         : topWebsites
     }
 })();
