@@ -266,6 +266,7 @@ var history = (function(){
         this.fullDate = obj.fullDate    || new Date();
         // Initially set to 0 - when closed or updated add to the duration
         this.duration = (obj.duration && obj.duration !== 0)? obj.duration : 0;
+        this.title = obj.title;
         //this.chromeObj = obj;
     };
 
