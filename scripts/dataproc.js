@@ -28,6 +28,7 @@ var dataProc = (function(){
             try{
                 dur += (set) ? arr[index[i]].duration : arr[i].duration;
             }catch(e){
+                console.error(e);
                 dur += 0;
             }
         }

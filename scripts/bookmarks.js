@@ -65,8 +65,6 @@ var bookmarks = (function(){
             'count' : count, 
             'pct'   : count/l1
         }
-
-        console.log(countInfo['pct']);
     };
 
     var getCount = function(type){

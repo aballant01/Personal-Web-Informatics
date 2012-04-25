@@ -113,7 +113,24 @@ var app = (function(){
     var addInformatics = function(){
 
         var appFunctions = buildFunctionList();
+        var usedItems = 0;
 
+        while(appFunctions.length !== 0 && usedItems < 10){
+            var randInt = dataProc.getRandomInt(0, appFunctions.length);
+
+            var elem = appFunctions[randInt];
+            appFunctions.splice(randInt, 1);
+            try{
+                var stateStr = elem();
+                addBodyElem(stateStr);
+            }catch(e){
+                console.error(e, elem);
+                continue;
+            }finally{
+                usedItems += 1;
+            }
+        }
+        /*
         for(var i = 0, l = appFunctions.length; i < l; i++){
             try{
                 var elem = appFunctions[i]();
@@ -124,6 +141,7 @@ var app = (function(){
                 continue;
             }
         }
+        */
 
     };
     
@@ -204,13 +222,60 @@ var app = (function(){
         )
     };
 
+    var driveInit = function(){
+        drive.init("read");
+    };
+
+    var mergeData = function(writeData){
+        if(writeData !== ""){
+            writeData = JSON.parse(writeData);
+            
+            var local = JSON.parse(localStorage['web_informatics_data'])
+            console.log(local);
+           
+            data.history = writeData.history.concat(local.history);
+            console.log(data.history);
+
+            data.indices = combineObjArray(data.indices, writeData.indices);
+            data.byDate = combineObjArray(data.byDate, writeData.byDate);
+
+            console.log("indices", data.indices);
+
+            console.log(data);
+
+            //$.extend(true, obj, writeData,JSON.parse(localStorage['web_informatics_data']));
+        }
+
+        addInformatics();
+    };
+
+    var combineObjArray = function(arr1, arr2){
+        var rObj = {};
+        
+        for(k in arr1){
+            rObj[k] = arr1[k];
+        }
+
+        for(k in arr2){
+            if(rObj[k]){
+                rObj[k] = rObj[k].concat(arr2[k]);
+            }else{
+                rObj[k] = arr2[k];
+            }
+        }
+
+        return rObj;
+    };
+
     return {
-        data           :data,
+        data           : data,
         $container     : $container,
         $infoItem      : $infoItem,
         $infoP         : $infoP,
         addInformatics : addInformatics,
         compareItems   : compareItems,
-        statements     : statements
+        statements     : statements,
+        driveInit           : driveInit,
+        mergeData      : mergeData
     };
 })();

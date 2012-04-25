@@ -125,7 +125,8 @@ var history = (function(){
     var buildWebTime = function(){
         var $p = app.$infoP.clone();
 
-        var time = getTime();
+        var time = dataProc.fetchTime(app.data.history);
+       
         var timecomp = time/app.compareItems['apollo11Length'];        
 
         if(!dataProc.isNumeric(timecomp)){
@@ -694,7 +695,10 @@ var history = (function(){
 		
 	};
 
-
+    /*
+    * Finds the top two websites that you've visited and returns them
+    * with a random website
+    */
     var topWebsites = function(){
         var indices = app.data.indices;
         var totalTime = 0;
