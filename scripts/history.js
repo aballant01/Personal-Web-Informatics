@@ -573,14 +573,18 @@ var history = (function(){
 			}
 		}
 		
-        var dayNum = dataProc.getDayOfWeek(maxIndex);
-        if( !dataProc.isNumeric(dayNum) ){
+        var dayOfWeek = dataProc.getDayOfWeek(maxIndex);
+        
+		/*
+		Why is this added?
+		if( !dataProc.isNumeric(dayOfWeek) ){
             throw new dataProc.NumericException();
         }
+		*/
 		// Format and return statement
 		var str = app.statements['mostTabDayOfWeek'];
 		return [
-                str.format(dayNum),
+                str.format(dayOfWeek),
                 "BarTWO.png"
             ];
 		
@@ -635,7 +639,7 @@ var history = (function(){
 				
 				// Add duration to the list and combine overlapped durations
 				var combined = false;
-				for (var j = 0; j < durationList.length; j++) {
+				for (var j = durationList.length-1; j >= 0; j--) {
 					var endTime = durationList[j].startTime + durationList[j].duration;
 					if (currItem.startTime >= durationList[j].startTime && currItem.startTime <= endTime) {
 						durationList[j].duration = currItem.startTime + currItem.duration - durationList[j].startTime;
@@ -733,6 +737,232 @@ var history = (function(){
         ];
     };
 	
+	
+	/*
+	* Find the total time for the items (durations for these items can overlap)
+	*/
+	var getTimeForItems = function(items) {
+		
+		var durationList = new Array();
+		for (var i = 0; i < items.length; i++) {
+			var currItem = items[i];
+			
+			// Add duration to the list and combine overlapped durations
+			var combined = false;
+			for (var j = durationList.length-1; j >= 0; j--) {
+				var endTime = durationList[j].startTime + durationList[j].duration;
+				if (currItem.startTime >= durationList[j].startTime && currItem.startTime <= endTime) {
+					durationList[j].duration = currItem.startTime + currItem.duration - durationList[j].startTime;
+					endTime = durationList[j].startTime + durationList[j].duration;
+					if (j+1 < durationList.length) {
+						if (durationList[j+1].startTime <= endTime) {
+							durationList[j].duration = durationList[j+1].startTime + durationList[j+1].duration - durationList[j].startTime;
+							durationList.splice(j+1, 1);
+						}
+					}
+					combined = true;
+					break;
+				}
+			}
+			if (!combined) {
+				var newEntry = new Object();
+				newEntry.startTime = currItem.startTime;
+				newEntry.duration = currItem.duration;
+				durationList.push(newEntry);
+			}
+		}
+		
+		// Sum up durations in the list
+		var totalTime = 0;
+		for (var i = 0; i < durationList.length; i++) {
+			totalTime += durationList[i].duration;
+		}
+		return totalTime;
+	}
+	
+	var topSitePercentageTime = function(){
+		
+		// Find first date, total time, and total number of sites
+		var websites = new Object();
+		websites['all'] = new Array();
+		for (var i = 0; i < app.data.history.length; i++) {
+			var currItem = app.data.history[i];
+			if (currItem){
+				if (!websites[currItem.baseURL]) {
+					websites[currItem.baseURL] = new Array();
+				}
+				websites[currItem.baseURL].push(currItem);
+				websites['all'].push(currItem);
+			}
+		}
+		
+		// Get total time for each website
+		for (var website in websites) {
+			websites[website] = getTimeForItems(websites[website]);
+		}
+		
+		// Find the website with most time
+		var maxTime = 0;
+		for (var website in websites) {
+			if (websites[website] > maxTime && website != 'all') {
+				maxTime = websites[website];
+			}
+		}
+		
+		var topPercent = dataProc.round(maxTime/websites['all']*100, 2);
+
+		if(!dataProc.isNumeric(topPercent)){
+			throw new dataProc.NumericException();
+		}
+		
+		// Format and return statement
+		var str = app.statements['topSitePercentageTime'];
+		return [
+				str.format(topPercent),
+				"pie.png"
+			];
+		
+	};
+	
+	var averageDuration = function() {
+		
+		// Sum up durations for each website
+		var websitesNum = new Object();
+		var websitesDur = new Object();
+		for (var i = 0; i < app.data.history.length; i++) {
+			var currItem = app.data.history[i];
+			if (currItem){
+				if (!websitesNum[currItem.baseURL]) {
+					websitesNum[currItem.baseURL] = 0;
+					websitesDur[currItem.baseURL] = 0;
+				}
+				websitesNum[currItem.baseURL] += 1;
+				websitesDur[currItem.baseURL] += currItem.duration;
+			}
+		}
+		
+		// Averages the durations
+		for (var website in websitesDur) {
+			websitesDur[website] = websitesDur[website] / websitesNum[website];
+		}
+		
+		// Find high and low
+		var highSite = '';
+		var highDur = 0;
+		var lowSite = '';
+		var lowDur = Number.POSITIVE_INFINITY ;
+		for (var website in websitesDur) {
+			if (websitesDur[website] > highDur) {
+				highSite = website;
+				highDur = websitesDur[website];
+			}
+			if (websitesDur[website] < lowDur) {
+				lowSite = website;
+				lowDur = websitesDur[website];
+			}
+		}
+		
+		highDur = dataProc.round(highDur/3600000, 2);
+		lowDur = dataProc.round(highDur/1000, 2);
+		
+		if(!dataProc.isNumeric(highDur) || !dataProc.isNumeric(lowDur)){
+			throw new dataProc.NumericException();
+		}
+		
+		// Format and return statement
+		var str = app.statements['averageDuration'];
+		return [
+			str.format(lowSite, lowDur, highSite, highDur),
+			"BarTWO.png"
+			];
+	}
+	
+	var yesterdayTodaySite = function() {
+	
+		var twoDayTime = 172800000;
+		var now = Date.now();
+		var todayDate = (new Date(now)).getDate();
+		
+		// Sum up durations for each website
+		var yesterdayWebsites = new Object();
+		var todayWebsites = new Object();
+		for (var i = 0; i < app.data.history.length; i++) {
+			var currItem = app.data.history[i];
+			if (currItem){
+				if (now - currItem.startTime < twoDayTime) { // Check to see if it is within two days
+					var currItemDate = (new Date(currItem.startTime)).getDate();
+					if (currItemDate == todayDate) { // Is today
+						if (!todayWebsites[currItem.baseURL]) {
+							todayWebsites[currItem.baseURL] = new Array();
+						}
+						todayWebsites[currItem.baseURL].push(currItem);
+					}
+					else { // Is yesterday
+						if (!yesterdayWebsites[currItem.baseURL]) {
+							yesterdayWebsites[currItem.baseURL] = new Array();
+						}
+						yesterdayWebsites[currItem.baseURL].push(currItem);
+					}
+					
+				}
+			}
+		}
+		
+		// Get total time for each website
+		for (var website in yesterdayWebsites) {
+			yesterdayWebsites[website] = getTimeForItems(yesterdayWebsites[website]);
+		}
+		for (var website in todayWebsites) {
+			todayWebsites[website] = getTimeForItems(todayWebsites[website]);
+		}
+		
+		// Find website with biggest difference in time
+		var biggestDiff = 0;
+		var biggestDiffSite = '';
+		for (var website in todayWebsites) {
+			if (yesterdayWebsites[website]) {
+				var diff = Math.abs(yesterdayWebsites[website] - todayWebsites[website]);
+				if (diff > biggestDidd) {
+					biggestDiff = diff;
+					biggestDiffSite = website;
+				}
+			}
+		}
+		
+		// Calculate factor and direction
+		var multiple = 0;
+		var direction;
+		if  (yesterdayWebsites[biggestDiffSite] > todayWebsites[biggestDiffSite]) {
+			direction = 'more';
+			if (todayWebsites[website] != 0) {
+				multiple = dataProc.round(yesterdayWebsites[website]/todayWebsites[website], 2);
+			}
+			else {
+				multiple = 'infinite';
+			}
+		}
+		else {
+			direction = 'less';
+			if (yesterdayWebsites[website] != 0) {
+				multiple = dataProc.round(todayWebsites[website]/yesterdayWebsites[website], 2);
+			}
+			else {
+				multiple = 'infinite';
+			}
+		}
+		
+		if(!dataProc.isNumeric(multiple) && multiple != 'infinite'){
+			throw new dataProc.NumericException();
+		}
+		
+		// Format and return statement
+		var str = app.statements['yesterdayTodaySite'];
+		return [
+			str.format(biggestDiffSite, direction),
+			"BarTWO.png"
+			];
+	}
+	
     return {
         getTime     : getTime,
         fetchTotalWebVisits : fetchTotalWebVisits,
@@ -754,7 +984,10 @@ var history = (function(){
 		mostTabDayOfWeek	: mostTabDayOfWeek,
 		mostTimeDayOfWeek	: mostTimeDayOfWeek,
 		overallTimeNum		: overallTimeNum,
-        topWebsites         : topWebsites
+        topWebsites         : topWebsites,
+		topSitePercentageTime : topSitePercentageTime,
+		averageDuration		: averageDuration,
+		yesterdayTodaySite	: yesterdayTodaySite
     }
 
 })();
