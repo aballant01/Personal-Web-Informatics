@@ -958,7 +958,7 @@ var history = (function(){
 		// Format and return statement
 		var str = app.statements['yesterdayTodaySite'];
 		return [
-			str.format(biggestDiffSite, direction),
+			str.format(multiple, direction),
 			"BarTWO.png"
 			];
 	}
