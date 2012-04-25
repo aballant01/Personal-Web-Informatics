@@ -204,13 +204,33 @@ var app = (function(){
         )
     };
 
+    /**
+     * Allow user to export serialized JSON data from PWI
+     * to the local user space of their fs.
+     *
+     * Right now kind of hackish: just forces the browser to
+     * download the serialized data stream as a file named 'download'
+     * to the default browser download location. But gets the job done
+     * in terms of simply and easily exporting the data: just call
+     * app.exportData()
+     * from the Javascript console.
+     *
+     * Files API implementation complete with save-as dialog access
+     * coming soon.
+     */
+    var exportData = function() {
+        var uriContent = "data:application/octet-stream," + encodeURIComponent(localStorage.web_informatics_data);
+        window.open(uriContent, 'PWI data');
+    };
+
     return {
-        data           :data,
+        data           : data,
         $container     : $container,
         $infoItem      : $infoItem,
         $infoP         : $infoP,
         addInformatics : addInformatics,
         compareItems   : compareItems,
-        statements     : statements
+        statements     : statements,
+        exportData     : exportData
     };
 })();
