@@ -96,7 +96,13 @@ var app = (function(){
 		"overallTimeNum"	: "Did you know that we've been recording your activity for {0} days. " +
 			"In that time, we've seen you online for {1} hours, and recorded more than {2} sites you've visited.",
 
-        "topWebsites"       : "{0}, {1}, and {2} make up {3}% of your web browsing activity"
+        "topWebsites"       : "{0}, {1}, and {2} make up {3}% of your web browsing activity",
+		
+		"topSitePercentageTime" : "Weird. Your top most visited site only makes up for {0}% of your total browsing time.",
+		
+		"averageDuration"	: "On average, when you visit {0}, you leave within {1} seconds, but {2} can keep you for up to {3} hours.",
+		
+		"yesterdayTodaySite": " What's the buzz? Yesterday, you were on some website {0} times {1} than today."
     };
 
     var $container = $('#container');
@@ -172,7 +178,13 @@ var app = (function(){
 			
 			history.overallTimeNum,
 
-            history.topWebsites
+            history.topWebsites,
+			
+			history.topSitePercentageTime,
+			
+			history.averageDuration,
+			
+			history.yesterdayTodaySite
         ];
 
         return appFunctions;
