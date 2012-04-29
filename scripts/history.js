@@ -334,24 +334,10 @@ var history = (function(){
 	var googleOrFacebook = function() {
 		
 		// Get Facebook total time
-		var facebookTime = 0;
-		var facebookIndex = app.data.indices['www.facebook.com'];
-		for (var i = 0; i < facebookIndex.length; i++) {
-			var currItem = app.data.history[facebookIndex[i]];
-			if (currItem){
-				facebookTime += currItem.duration;
-			}
-		}
+		var facebookTime = dataProc.fetchTime(app.data.history, app.data.indices['www.facebook.com']);
 		
 		// Get Google total time
-		var googleTime = 0;
-		var googleIndex = app.data.indices['www.google.com'];
-		for (var i = 0; i < googleIndex.length; i++) {
-			var currItem = app.data.history[googleIndex[i]];
-			if (currItem){
-				googleTime += currItem.duration;
-			}
-		}
+		var googleTime = dataProc.fetchTime(app.data.history, app.data.indices['www.google.com']);
 		
 		// Format and return statement
 		var str = app.statements['googleOrFacebook'];
@@ -626,72 +612,35 @@ var history = (function(){
 	var overallTimeNum = function(){
 		
 		// Find first date, total time, and total number of sites
-		var totalInterval;
-		var websites = new Object();
-		var websiteCout = 0;
-		var durationList = new Array();
-		for (var i = 0; i < app.data.history.length; i++) {
-			var currItem = app.data.history[i];
-			if (currItem){
-				if (i == 0) {
-					totalInterval = Date.now() - currItem.startTime;
-				}
-				
-				// Add duration to the list and combine overlapped durations
-				var combined = false;
-				for (var j = durationList.length-1; j >= 0; j--) {
-					var endTime = durationList[j].startTime + durationList[j].duration;
-					if (currItem.startTime >= durationList[j].startTime && currItem.startTime <= endTime) {
-						durationList[j].duration = currItem.startTime + currItem.duration - durationList[j].startTime;
-						endTime = durationList[j].startTime + durationList[j].duration;
-						if (j+1 < durationList.length) {
-							if (durationList[j+1].startTime <= endTime) {
-								durationList[j].duration = durationList[j+1].startTime + durationList[j+1].duration - durationList[j].startTime;
-								durationList.splice(j+1, 1);
-							}
-						}
-						combined = true;
-						break;
-					}
-				}
-				if (!combined) {
-					var newEntry = new Object();
-					newEntry.startTime = currItem.startTime;
-					newEntry.duration = currItem.duration;
-					durationList.push(newEntry);
-				}
-				
-				if (!websites[currItem.baseURL]) {
-					websites[currItem.baseURL] = true;
-					websiteCout++;
-				}
+		var totalInterval = 0;
+		if (app.data.history[0]) {
+			totalInterval = Date.now() - app.data.history[0].startTime;
+		}
+		var websiteCount = 0;
+		for (var website in app.data.indices) {
+			websiteCount++;
+		}
+		
+		var totalTime = dataProc.fetchTime(app.data.history);
+		
+		var timeData = [
+			dataProc.round(totalInterval/86400000, 2),
+			dataProc.round(totalTime/3600000, 2),
+			websiteCount
+		];
+		
+		for(var i = 0; i < 3; i++){
+			if(!dataProc.isNumeric(timeData[i])){
+				throw new dataProc.NumericException();
 			}
 		}
 		
-		// Sum up durations in the list
-		var totalTime = 0;
-		for (var i = 0; i < durationList.length; i++) {
-			totalTime += durationList[i].duration;
-		}
-		
-        var timeData = [
-            dataProc.round(totalInterval/86400000, 2),
-            dataProc.round(totalTime/3600000, 2),
-            websiteCout
-        ];
-
-        for(var i = 0; i < 3; i++){
-            if(!dataProc.isNumeric(timeData[i])){
-                throw new dataProc.NumericException();
-            }
-        }
-
 		// Format and return statement
 		var str = app.statements['overallTimeNum'];
 		return [
-                str.format(timeData[0], timeData[1], timeData[2]),
-                "BarTWO.png"
-            ];
+				str.format(timeData[0], timeData[1], timeData[2]),
+				"BarTWO.png"
+			];
 		
 	};
 
@@ -737,79 +686,24 @@ var history = (function(){
         ];
     };
 	
-	
-	/*
-	* Find the total time for the items (durations for these items can overlap)
-	*/
-	var getTimeForItems = function(items) {
-		
-		var durationList = new Array();
-		for (var i = 0; i < items.length; i++) {
-			var currItem = items[i];
-			
-			// Add duration to the list and combine overlapped durations
-			var combined = false;
-			for (var j = durationList.length-1; j >= 0; j--) {
-				var endTime = durationList[j].startTime + durationList[j].duration;
-				if (currItem.startTime >= durationList[j].startTime && currItem.startTime <= endTime) {
-					durationList[j].duration = currItem.startTime + currItem.duration - durationList[j].startTime;
-					endTime = durationList[j].startTime + durationList[j].duration;
-					if (j+1 < durationList.length) {
-						if (durationList[j+1].startTime <= endTime) {
-							durationList[j].duration = durationList[j+1].startTime + durationList[j+1].duration - durationList[j].startTime;
-							durationList.splice(j+1, 1);
-						}
-					}
-					combined = true;
-					break;
-				}
-			}
-			if (!combined) {
-				var newEntry = new Object();
-				newEntry.startTime = currItem.startTime;
-				newEntry.duration = currItem.duration;
-				durationList.push(newEntry);
-			}
-		}
-		
-		// Sum up durations in the list
-		var totalTime = 0;
-		for (var i = 0; i < durationList.length; i++) {
-			totalTime += durationList[i].duration;
-		}
-		return totalTime;
-	}
-	
 	var topSitePercentageTime = function(){
 		
-		// Find first date, total time, and total number of sites
-		var websites = new Object();
-		websites['all'] = new Array();
-		for (var i = 0; i < app.data.history.length; i++) {
-			var currItem = app.data.history[i];
-			if (currItem){
-				if (!websites[currItem.baseURL]) {
-					websites[currItem.baseURL] = new Array();
-				}
-				websites[currItem.baseURL].push(currItem);
-				websites['all'].push(currItem);
-			}
-		}
-		
 		// Get total time for each website
-		for (var website in websites) {
-			websites[website] = getTimeForItems(websites[website]);
+		var totalTime = dataProc.fetchTime(app.data.history);
+		var websites = new Object();
+		for (var website in app.data.indices) {
+			websites[website] = dataProc.fetchTime(app.data.history, app.data.indices[website]);
 		}
 		
 		// Find the website with most time
 		var maxTime = 0;
 		for (var website in websites) {
-			if (websites[website] > maxTime && website != 'all') {
+			if (websites[website] > maxTime) {
 				maxTime = websites[website];
 			}
 		}
 		
-		var topPercent = dataProc.round(maxTime/websites['all']*100, 2);
+		var topPercent = dataProc.round(maxTime/totalTime*100, 2);
 
 		if(!dataProc.isNumeric(topPercent)){
 			throw new dataProc.NumericException();
@@ -856,14 +750,14 @@ var history = (function(){
 				highSite = website;
 				highDur = websitesDur[website];
 			}
-			if (websitesDur[website] < lowDur) {
+			if (websitesDur[website] < lowDur && websitesDur[website] != 0) {
 				lowSite = website;
 				lowDur = websitesDur[website];
 			}
 		}
 		
 		highDur = dataProc.round(highDur/3600000, 2);
-		lowDur = dataProc.round(highDur/1000, 2);
+		lowDur = dataProc.round(lowDur/1000, 2);
 		
 		if(!dataProc.isNumeric(highDur) || !dataProc.isNumeric(lowDur)){
 			throw new dataProc.NumericException();
@@ -893,27 +787,18 @@ var history = (function(){
 					var currItemDate = (new Date(currItem.startTime)).getDate();
 					if (currItemDate == todayDate) { // Is today
 						if (!todayWebsites[currItem.baseURL]) {
-							todayWebsites[currItem.baseURL] = new Array();
+							todayWebsites[currItem.baseURL] = currItem.duration;
 						}
-						todayWebsites[currItem.baseURL].push(currItem);
+						todayWebsites[currItem.baseURL] += currItem.duration;
 					}
 					else { // Is yesterday
 						if (!yesterdayWebsites[currItem.baseURL]) {
-							yesterdayWebsites[currItem.baseURL] = new Array();
+							yesterdayWebsites[currItem.baseURL] = currItem.duration;
 						}
-						yesterdayWebsites[currItem.baseURL].push(currItem);
+						yesterdayWebsites[currItem.baseURL] += currItem.duration;
 					}
-					
 				}
 			}
-		}
-		
-		// Get total time for each website
-		for (var website in yesterdayWebsites) {
-			yesterdayWebsites[website] = getTimeForItems(yesterdayWebsites[website]);
-		}
-		for (var website in todayWebsites) {
-			todayWebsites[website] = getTimeForItems(todayWebsites[website]);
 		}
 		
 		// Find website with biggest difference in time
@@ -921,37 +806,29 @@ var history = (function(){
 		var biggestDiffSite = '';
 		for (var website in todayWebsites) {
 			if (yesterdayWebsites[website]) {
-				var diff = Math.abs(yesterdayWebsites[website] - todayWebsites[website]);
-				if (diff > biggestDidd) {
-					biggestDiff = diff;
-					biggestDiffSite = website;
+				if (todayWebsites[website] != 0 && yesterdayWebsites[website] != 0) {
+					var diff = Math.abs(yesterdayWebsites[website] - todayWebsites[website]);
+					if (diff > biggestDiff) {
+						biggestDiff = diff;
+						biggestDiffSite = website;
+					}
 				}
 			}
 		}
 		
 		// Calculate factor and direction
-		var multiple = 0;
+		var multiple = '';
 		var direction;
 		if  (yesterdayWebsites[biggestDiffSite] > todayWebsites[biggestDiffSite]) {
 			direction = 'more';
-			if (todayWebsites[website] != 0) {
-				multiple = dataProc.round(yesterdayWebsites[website]/todayWebsites[website], 2);
-			}
-			else {
-				multiple = 'infinite';
-			}
+			multiple = dataProc.round(yesterdayWebsites[biggestDiffSite]/todayWebsites[biggestDiffSite], 2);
 		}
 		else {
 			direction = 'less';
-			if (yesterdayWebsites[website] != 0) {
-				multiple = dataProc.round(todayWebsites[website]/yesterdayWebsites[website], 2);
-			}
-			else {
-				multiple = 'infinite';
-			}
+			multiple = dataProc.round(todayWebsites[biggestDiffSite]/yesterdayWebsites[biggestDiffSite], 2);
 		}
 		
-		if(!dataProc.isNumeric(multiple) && multiple != 'infinite'){
+		if(!dataProc.isNumeric(multiple)){
 			throw new dataProc.NumericException();
 		}
 		
