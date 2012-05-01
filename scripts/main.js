@@ -81,7 +81,7 @@
     string below and create the file for it. 
     */
 
-    var modules = "app dataproc history bookmarks";
+    var modules = "app drive dataproc history bookmarks";
     
     // Load the selected module
     require(modules.split(" "), function(){
@@ -92,6 +92,8 @@
 
     var initialize = function(){
         bookmarks.build();
-        app.addInformatics();
+        //app.addInformatics();
+        //drive.init();
+        app.driveInit();
     };
 })();
