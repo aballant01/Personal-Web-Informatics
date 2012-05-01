@@ -6,7 +6,7 @@ var drive = (function(){
             fs.root.getFile('appData.txt',{create:true}, writeData, errorHandler);
         },
         "read"   : function(fs){
-            fs.root.getFile('appData.txt', {}, readData, errorHandler)
+            fs.root.getFile('appData.txt', {create:true}, readData, errorHandler)
         },
         "delete" : function(fs){
             fs.root.getFile('appData.txt', {create: false}, rmFile, errorHandler)
