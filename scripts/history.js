@@ -19,7 +19,7 @@ var history = (function(){
 
         return [
             app.statements['num1994WebDev'].format(webVisits),
-            "boxOrangeBang.png"
+            "interWebs.png"
         ];
         
     };
