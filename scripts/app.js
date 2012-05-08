@@ -117,7 +117,11 @@ var app = (function(){
     * to code up. 
     */
     var addInformatics = function(){
-
+        addArrElements(buildComparomatics(), "Comparomatics");
+        addArrElements(buildMisinformatics(), "Misinformatics");
+        addArrElements(buildRandomatics(), "Randomatics");
+        addArrElements(buildCreepomatics(), "Creepomatics");
+        /*
         var appFunctions = buildFunctionList();
         var usedItems = 0;
 
@@ -135,22 +139,30 @@ var app = (function(){
             }finally{
                 usedItems += 1;
             }
-        }
-        /*
-        for(var i = 0, l = appFunctions.length; i < l; i++){
-            try{
-                var elem = appFunctions[i]();
-                addBodyElem(elem);
-            }catch(e){
-                console.error(e);
-                console.log(appFunctions[i]);
-                continue;
-            }
-        }
-        */
-
+        }*/
     };
     
+    var addArrElements = function(functionArr, title){
+        var usedItems = 0;
+        $container.append($("<h4></h4>").text(title));
+
+        while(functionArr.length !== 0 && usedItems < 4){
+            var randInt = dataProc.getRandomInt(0, functionArr.length);
+
+            var elem = functionArr[randInt];
+            functionArr.splice(randInt, 1);
+            try{
+                var stateStr = elem();
+                addBodyElem(stateStr);
+            }catch(e){
+                console.error(e, elem);
+                continue;
+            }finally{
+                usedItems += 1;
+            }
+        }
+    };
+
     /**
     * 
     */
@@ -206,6 +218,50 @@ var app = (function(){
         ];
 
         return appFunctions;
+    };
+
+    var buildComparomatics = function(){
+        return [
+            history.buildWebTime,
+            history.fetchTotalWebVisits,
+            history.googEnergy,
+            history.googleOrFacebook
+        ];
+    };
+
+    var buildMisinformatics = function(){
+        return [
+            function(){
+                return history.buildVisitComp("www.google.com");
+            },
+            history.ambiWebTime,
+            history.comVersusEdu,
+            history.websiteMarathon,
+            history.topWebsites
+        ];
+    };
+
+    var buildCreepomatics = function(){
+
+        return [
+            function(){
+                return history.fetchYoutube('time');
+            },
+            history.findMinTime,
+            history.fetchFacebook,
+            history.fetchFacebookMostFrequentPage,
+            history.overallTimeNum
+        ];
+    };
+
+    var buildRandomatics = function(){
+        return [
+            history.findFavImgType,
+            history.mostTabDayOfWeek,
+            history.mostTimeDayOfWeek,
+            history.topSitePercentageTime,
+            history.averageDuration
+        ];
     };
 
     /**
