@@ -352,7 +352,8 @@ var app = (function(){
     var exportData = function() {
         var uriContent = "data:application/octet-stream," + encodeURIComponent(localStorage.web_informatics_data);
         window.open(uriContent, 'PWI data');
-	
+	}
+
     return {
         data           : data,
         $container     : $container,
